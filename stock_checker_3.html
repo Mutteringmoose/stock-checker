@@ -1191,7 +1191,7 @@
   </div>
 
   <div class="search-wrap" style="display:flex!important;flex-direction:column!important;width:100%!important;gap:12px;">
-    <input type="text" id="tickerInput" placeholder="MSFT, AAPL, NVDA..." maxlength="10"/>
+    <input type="text" id="tickerInput" placeholder="Apple, Microsoft, or AAPL..." maxlength="10"/>
     <button id="analyzeBtn" onclick="analyze()">Analyze</button>
   </div>
 
@@ -1592,11 +1592,45 @@ function calcRSI(prices, period = 14) {
 }
 
 async function analyze() {
-  const input = document.getElementById('tickerInput');
-  const ticker = input.value.trim().toUpperCase();
-  if (!ticker) return;
+  const input  = document.getElementById('tickerInput');
+  const raw    = input.value.trim();
+  if (!raw) return;
 
   hideError();
+
+  // Resolve company name → ticker if needed
+  const isTicker = /^[A-Za-z]{1,5}$/.test(raw);
+  let ticker;
+  if (isTicker) {
+    ticker = raw.toUpperCase();
+  } else {
+    // Show searching state
+    const btn = document.getElementById('analyzeBtn');
+    const origLabel = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner"></span>Searching...';
+    btn.disabled = true;
+    try {
+      const searchRes  = await fetch(`https://financialmodelingprep.com/stable/search-symbol?query=${encodeURIComponent(raw)}&limit=10&apikey=${FMP_KEY}`);
+      const searchData = await searchRes.json();
+      const results    = Array.isArray(searchData) ? searchData : (searchData?.data || []);
+      // Prefer US exchanges
+      const match = results.find(r => ['NASDAQ','NYSE','AMEX','NYSE ARCA'].includes(r.exchangeShortName))
+                 || results[0];
+      if (!match?.symbol) {
+        showError(`No stock found for "${raw}". Try the ticker symbol (e.g. AAPL).`);
+        btn.innerHTML = origLabel;
+        btn.disabled  = false;
+        return;
+      }
+      ticker = match.symbol.toUpperCase();
+      input.value = ticker; // Show resolved ticker in the box
+    } catch(e) {
+      showError('Search failed. Please enter a ticker symbol directly.');
+      btn.innerHTML = origLabel;
+      btn.disabled  = false;
+      return;
+    }
+  }
   document.getElementById('verdict').className = 'verdict';
   document.getElementById('stockInfo').className = 'stock-info';
 
