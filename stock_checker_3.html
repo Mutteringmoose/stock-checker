@@ -1482,71 +1482,84 @@ async function fetchYahoo(ticker) {
 }
 
 async function fetchFMPFundamentals(ticker) {
-
-  // ── Try FMP v3 first ──────────────────────────────
   try {
-    const incomeUrl = `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?limit=4&apikey=${FMP_KEY}`;
-    const bsUrl     = `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?limit=2&apikey=${FMP_KEY}`;
+    const incomeUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=annual&limit=4&apikey=${FMP_KEY}`;
+    const bsUrl     = `https://financialmodelingprep.com/stable/balance-sheet-statement?symbol=${ticker}&period=annual&limit=2&apikey=${FMP_KEY}`;
+
     const [iRes, bRes] = await Promise.all([fetch(incomeUrl), fetch(bsUrl)]);
     const iRaw = await iRes.json();
     const bRaw = await bRes.json();
 
-    // Detect legacy/blocked error
-    const iBlocked = !Array.isArray(iRaw) || iRaw.length === 0;
-    const bBlocked = !Array.isArray(bRaw) || bRaw.length === 0;
+    console.log('FMP income:', JSON.stringify(iRaw).substring(0, 300));
+    console.log('FMP bs:', JSON.stringify(bRaw).substring(0, 300));
 
-    if (!iBlocked && !bBlocked) {
-      console.log('FMP success');
-      return { income: iRaw, bs: bRaw, source: 'FMP' };
+    // Extract array from whatever format FMP returns
+    const income = Array.isArray(iRaw) ? iRaw
+                 : Array.isArray(iRaw?.data) ? iRaw.data : [];
+    const bs     = Array.isArray(bRaw) ? bRaw
+                 : Array.isArray(bRaw?.data) ? bRaw.data : [];
+
+    if (income.length > 0 && bs.length > 0) {
+      return { income, bs, source: 'FMP' };
     }
-    console.log('FMP blocked or empty, falling back to Alpha Vantage');
-  } catch(e) {
-    console.log('FMP error, falling back to Alpha Vantage:', e.message);
-  }
 
-  // ── Fallback: Alpha Vantage ───────────────────────
-  try {
+    // Try quarterly as fallback for non-standard fiscal years
+    const incomeQUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=quarter&limit=8&apikey=${FMP_KEY}`;
+    const bsQUrl     = `https://financialmodelingprep.com/stable/balance-sheet-statement?symbol=${ticker}&period=quarter&limit=4&apikey=${FMP_KEY}`;
+
+    const [iQRes, bQRes] = await Promise.all([fetch(incomeQUrl), fetch(bsQUrl)]);
+    const iQRaw = await iQRes.json();
+    const bQRaw = await bQRes.json();
+
+    const incomeQ = Array.isArray(iQRaw) ? iQRaw : Array.isArray(iQRaw?.data) ? iQRaw.data : [];
+    const bsQ     = Array.isArray(bQRaw) ? bQRaw : Array.isArray(bQRaw?.data) ? bQRaw.data : [];
+
+    if (incomeQ.length >= 4) {
+      // Aggregate last 4 quarters into TTM
+      const qtrs = incomeQ.slice(0, 4);
+      const sum  = f => qtrs.reduce((s, q) => s + (parseFloat(q[f]) || 0), 0);
+      const ttm  = { revenue: sum('revenue'), netIncome: sum('netIncome'), date: qtrs[0]?.date };
+      const prev = incomeQ.length >= 8 ? {
+        revenue: incomeQ.slice(4, 8).reduce((s, q) => s + (parseFloat(q.revenue) || 0), 0)
+      } : null;
+      return {
+        income: [ttm, prev].filter(Boolean),
+        bs:     bsQ,
+        source: 'FMP (TTM)'
+      };
+    }
+
+    // Last resort: Alpha Vantage
+    console.log('FMP empty, trying Alpha Vantage...');
     const avIncome = PROXY + encodeURIComponent(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${ticker}&apikey=${AV_KEY}`);
     const avBS     = PROXY + encodeURIComponent(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker}&apikey=${AV_KEY}`);
-    const [ovRes, bsRes] = await Promise.all([
-      fetch(avIncome),
-      fetch(avBS)
-    ]);
-    const ovData = await ovRes.json();
-    const bsData = await bsRes.json();
+    const [avIRes, avBRes] = await Promise.all([fetch(avIncome), fetch(avBS)]);
+    const avI = await avIRes.json();
+    const avB = await avBRes.json();
 
-    const annualIncome = ovData?.annualReports;
-    const annualBS     = bsData?.annualReports;
-
-    if (!annualIncome || annualIncome.length === 0) {
-      console.log('Alpha Vantage also returned no data');
-      return { income: [], bs: [], source: null };
-    }
-
-    // Normalize AV income fields to match our expected format
-    const income = annualIncome.slice(0, 2).map(r => ({
-      revenue:   parseFloat(r.totalRevenue)  || 0,
-      netIncome: parseFloat(r.netIncome)     || 0,
+    const avInc = (avI?.annualReports || []).slice(0, 2).map(r => ({
+      revenue:   parseFloat(r.totalRevenue) || 0,
+      netIncome: parseFloat(r.netIncome)    || 0,
       date:      r.fiscalDateEnding
     }));
-
-    // Normalize AV balance sheet fields
-    const bs = (annualBS || []).slice(0, 1).map(r => ({
+    const avBs = (avB?.annualReports || []).slice(0, 1).map(r => ({
       cashAndCashEquivalents: parseFloat(r.cashAndCashEquivalentsAtCarryingValue) || 0,
       shortTermInvestments:   parseFloat(r.shortTermInvestments) || 0,
-      totalDebt:              (parseFloat(r.shortLongTermDebtTotal) || 0) ||
-                              (parseFloat(r.longTermDebt) || 0) + (parseFloat(r.shortTermDebt) || 0),
-      date: r.fiscalDateEnding
+      totalDebt: (parseFloat(r.shortLongTermDebtTotal) || 0) ||
+                 ((parseFloat(r.longTermDebt) || 0) + (parseFloat(r.shortTermDebt) || 0))
     }));
 
-    console.log('Alpha Vantage success');
-    return { income, bs, source: 'Alpha Vantage' };
+    if (avInc.length > 0) {
+      console.log('Alpha Vantage success');
+      return { income: avInc, bs: avBs, source: 'Alpha Vantage' };
+    }
+
+    return { income: [], bs: [], source: null };
 
   } catch(e) {
-    console.error('Alpha Vantage error:', e);
+    console.error('fetchFMPFundamentals error:', e);
     return { income: [], bs: [], source: null };
   }
-
 }
 
 
