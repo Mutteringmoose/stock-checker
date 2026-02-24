@@ -1967,7 +1967,7 @@ async function loadOptionsChain() {
   try {
     // 1. Get current stock quote
     const quoteRes = await fetch(
-      `https://api.tradier.com/v1/markets/quotes?symbols=${ticker}&greeks=false`,
+      `https://sandbox.tradier.com/v1/markets/quotes?symbols=${ticker}&greeks=false`,
       { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
     );
     const quoteJson = await quoteRes.json();
@@ -1976,7 +1976,7 @@ async function loadOptionsChain() {
 
     // 2. Get expirations
     const expRes = await fetch(
-      `https://api.tradier.com/v1/markets/options/expirations?symbol=${ticker}&includeAllRoots=false`,
+      `https://sandbox.tradier.com/v1/markets/options/expirations?symbol=${ticker}&includeAllRoots=false`,
       { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
     );
     const expJson = await expRes.json();
@@ -2031,7 +2031,7 @@ async function loadStrikesByExp() {
 
   try {
     const res = await fetch(
-      `https://api.tradier.com/v1/markets/options/chains?symbol=${optCurrentTicker}&expiration=${expDate}&greeks=true`,
+      `https://sandbox.tradier.com/v1/markets/options/chains?symbol=${optCurrentTicker}&expiration=${expDate}&greeks=true`,
       { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
     );
     const json = await res.json();
