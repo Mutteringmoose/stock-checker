@@ -1482,20 +1482,19 @@ async function fetchYahoo(ticker) {
 
 async function fetchFMPFundamentals(ticker) {
   async function fetchStatements(period) {
-    const incomeUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=${period}&limit=8&apikey=${FMP_KEY}`;
-    const bsUrl     = `https://financialmodelingprep.com/stable/balance-sheet-statement?symbol=${ticker}&period=${period}&limit=4&apikey=${FMP_KEY}`;
+    const incomeUrl = period === 'annual'
+      ? `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?limit=4&apikey=${FMP_KEY}`
+      : `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?period=quarter&limit=8&apikey=${FMP_KEY}`;
+    const bsUrl = period === 'annual'
+      ? `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?limit=2&apikey=${FMP_KEY}`
+      : `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?period=quarter&limit=4&apikey=${FMP_KEY}`;
+
     const [incomeRes, bsRes] = await Promise.all([fetch(incomeUrl), fetch(bsUrl)]);
     const incomeRaw = await incomeRes.json();
     const bsRaw     = await bsRes.json();
-    console.log(`FMP ${period} income raw:`, JSON.stringify(incomeRaw).substring(0, 300));
-    console.log(`FMP ${period} bs raw:`, JSON.stringify(bsRaw).substring(0, 300));
-    // Handle both array response and {data:[]} response
-    const income = Array.isArray(incomeRaw) ? incomeRaw
-                 : Array.isArray(incomeRaw?.data) ? incomeRaw.data
-                 : Array.isArray(incomeRaw?.financials) ? incomeRaw.financials : [];
-    const bs     = Array.isArray(bsRaw) ? bsRaw
-                 : Array.isArray(bsRaw?.data) ? bsRaw.data
-                 : Array.isArray(bsRaw?.financials) ? bsRaw.financials : [];
+    console.log(`FMP v3 ${period} income:`, JSON.stringify(incomeRaw).substring(0, 200));
+    const income = Array.isArray(incomeRaw) ? incomeRaw : [];
+    const bs     = Array.isArray(bsRaw)     ? bsRaw     : [];
     return { income, bs };
   }
 
@@ -1537,7 +1536,7 @@ async function fetchFMPFundamentals(ticker) {
 
     // Last resort - try fetching profile for basic margin data
     try {
-      const profileRes  = await fetch(`https://financialmodelingprep.com/stable/profile?symbol=${ticker}&apikey=${FMP_KEY}`);
+      const profileRes  = await fetch(`https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${FMP_KEY}`);
       const profileData = await profileRes.json();
       const p = Array.isArray(profileData) ? profileData[0] : profileData?.data?.[0];
       if (p && p.netProfitMarginTTM != null) {
