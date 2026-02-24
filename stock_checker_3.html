@@ -17,11 +17,11 @@
 –bg: #060a0f;
 –surface: #0d1520;
 –border: #1a2a3a;
-–accent: #00d4ff;
-–accent2: #00ff88;
-–danger: #ff3d57;
-–warn: #ffb800;
-–text: #e0eaf5;
+–accent: #00e5ff;
+–accent2: #00ff99;
+–danger: #ff2244;
+–warn: #ffcc00;
+–text: #f0f8ff;
 –muted: #4a6080;
 –card: #0a1520;
 }
@@ -65,6 +65,15 @@ z-index: 1;
 .header {
 text-align: center;
 margin-bottom: 48px;
+}
+
+.header h1 {
+font-size: clamp(42px, 10vw, 72px);
+font-weight: 900;
+letter-spacing: -2px;
+color: var(–accent);
+text-shadow: 0 0 40px rgba(0,212,255,0.4);
+margin-bottom: 12px;
 }
 
 .header .label {
@@ -1118,15 +1127,21 @@ async function fetchYahoo(ticker) {
 }
 
 async function fetchFMPFundamentals(ticker) {
-  // Try annual first, fall back to quarterly if empty
   async function fetchStatements(period) {
-    const incomeUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=${period}&limit=4&apikey=${FMP_KEY}`;
+    const incomeUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=${period}&limit=8&apikey=${FMP_KEY}`;
     const bsUrl     = `https://financialmodelingprep.com/stable/balance-sheet-statement?symbol=${ticker}&period=${period}&limit=4&apikey=${FMP_KEY}`;
     const [incomeRes, bsRes] = await Promise.all([fetch(incomeUrl), fetch(bsUrl)]);
-    const incomeData = await incomeRes.json();
-    const bsData     = await bsRes.json();
-    const income = incomeData?.data || (Array.isArray(incomeData) ? incomeData : []);
-    const bs     = bsData?.data     || (Array.isArray(bsData)     ? bsData     : []);
+    const incomeRaw = await incomeRes.json();
+    const bsRaw     = await bsRes.json();
+    console.log(`FMP ${period} income raw:`, JSON.stringify(incomeRaw).substring(0, 300));
+    console.log(`FMP ${period} bs raw:`, JSON.stringify(bsRaw).substring(0, 300));
+    // Handle both array response and {data:[]} response
+    const income = Array.isArray(incomeRaw) ? incomeRaw
+                 : Array.isArray(incomeRaw?.data) ? incomeRaw.data
+                 : Array.isArray(incomeRaw?.financials) ? incomeRaw.financials : [];
+    const bs     = Array.isArray(bsRaw) ? bsRaw
+                 : Array.isArray(bsRaw?.data) ? bsRaw.data
+                 : Array.isArray(bsRaw?.financials) ? bsRaw.financials : [];
     return { income, bs };
   }
 
