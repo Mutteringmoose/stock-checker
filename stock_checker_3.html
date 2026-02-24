@@ -1469,8 +1469,9 @@ async function loadFearGreed() {
 
 // Load fear & greed on page load
 window.addEventListener('load', loadFearGreed);
-const FMP_KEY     = 'xVUPjSjRHiSCpoQZd3itcYudPFzolisd'; // <-- PASTE YOUR FMP API KEY HERE
-const TRADIER_KEY = 'GeYR0e9BgC2ODN2LFZBvscfFMh70';          // <-- PASTE YOUR TRADIER API KEY HERE
+const FMP_KEY     = 'xVUPjSjRHiSCpoQZd3itcYudPFzolisd';
+const TRADIER_KEY = 'GeYR0e9BgC2ODN2LFZBvscfFMh70';
+const AV_KEY      = 'OEITKB7QOV6KPC7T'; // Alpha Vantage fallback
 
 async function fetchYahoo(ticker) {
   const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`);
@@ -1481,79 +1482,71 @@ async function fetchYahoo(ticker) {
 }
 
 async function fetchFMPFundamentals(ticker) {
-  async function fetchStatements(period) {
-    const incomeUrl = period === 'annual'
-      ? `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?limit=4&apikey=${FMP_KEY}`
-      : `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?period=quarter&limit=8&apikey=${FMP_KEY}`;
-    const bsUrl = period === 'annual'
-      ? `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?limit=2&apikey=${FMP_KEY}`
-      : `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?period=quarter&limit=4&apikey=${FMP_KEY}`;
 
-    const [incomeRes, bsRes] = await Promise.all([fetch(incomeUrl), fetch(bsUrl)]);
-    const incomeRaw = await incomeRes.json();
-    const bsRaw     = await bsRes.json();
-    console.log(`FMP v3 ${period} income:`, JSON.stringify(incomeRaw).substring(0, 200));
-    const income = Array.isArray(incomeRaw) ? incomeRaw : [];
-    const bs     = Array.isArray(bsRaw)     ? bsRaw     : [];
-    return { income, bs };
-  }
-
+  // ── Try FMP v3 first ──────────────────────────────
   try {
-    // Try annual first
-    let result = await fetchStatements('annual');
+    const incomeUrl = `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?limit=4&apikey=${FMP_KEY}`;
+    const bsUrl     = `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?limit=2&apikey=${FMP_KEY}`;
+    const [iRes, bRes] = await Promise.all([fetch(incomeUrl), fetch(bsUrl)]);
+    const iRaw = await iRes.json();
+    const bRaw = await bRes.json();
 
-    if (result.income.length > 0 && result.bs.length > 0) {
-      return { ...result, source: 'Annual' };
+    // Detect legacy/blocked error
+    const iBlocked = !Array.isArray(iRaw) || iRaw.length === 0;
+    const bBlocked = !Array.isArray(bRaw) || bRaw.length === 0;
+
+    if (!iBlocked && !bBlocked) {
+      console.log('FMP success');
+      return { income: iRaw, bs: bRaw, source: 'FMP' };
     }
-
-    // Fall back to quarterly - aggregate last 4 quarters for TTM
-    result = await fetchStatements('quarter');
-
-    if (result.income.length >= 1) {
-      // Build TTM by summing last 4 quarters
-      const qtrs = result.income.slice(0, 4);
-      const sumField = (arr, field) => arr.reduce((s, q) => s + (q[field] || 0), 0);
-
-      const ttmInc = {
-        revenue:   sumField(qtrs, 'revenue'),
-        netIncome: sumField(qtrs, 'netIncome'),
-        date:      qtrs[0]?.date
-      };
-
-      // Prior 4 quarters for revenue growth
-      const prevQtrs = result.income.slice(4, 8);
-      const prevInc  = prevQtrs.length >= 2 ? {
-        revenue: sumField(prevQtrs, 'revenue')
-      } : null;
-
-      // Use most recent quarter BS
-      return {
-        income: [ttmInc, prevInc].filter(Boolean),
-        bs:     result.bs,
-        source: 'TTM'
-      };
-    }
-
-    // Last resort - try fetching profile for basic margin data
-    try {
-      const profileRes  = await fetch(`https://financialmodelingprep.com/api/v3/profile/${ticker}?apikey=${FMP_KEY}`);
-      const profileData = await profileRes.json();
-      const p = Array.isArray(profileData) ? profileData[0] : profileData?.data?.[0];
-      if (p && p.netProfitMarginTTM != null) {
-        return {
-          income: [{ revenue: 1, netIncome: p.netProfitMarginTTM }],
-          bs:     [{ cashAndCashEquivalents: 0, totalDebt: 0 }],
-          source: 'Profile'
-        };
-      }
-    } catch(e2) {}
-
-    return { income: [], bs: [], source: null };
+    console.log('FMP blocked or empty, falling back to Alpha Vantage');
   } catch(e) {
-    console.error('FMP fetch error:', e);
+    console.log('FMP error, falling back to Alpha Vantage:', e.message);
+  }
+
+  // ── Fallback: Alpha Vantage ───────────────────────
+  try {
+    const [ovRes, bsRes] = await Promise.all([
+      fetch(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${ticker}&apikey=${AV_KEY}`),
+      fetch(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker}&apikey=${AV_KEY}`)
+    ]);
+    const ovData = await ovRes.json();
+    const bsData = await bsRes.json();
+
+    const annualIncome = ovData?.annualReports;
+    const annualBS     = bsData?.annualReports;
+
+    if (!annualIncome || annualIncome.length === 0) {
+      console.log('Alpha Vantage also returned no data');
+      return { income: [], bs: [], source: null };
+    }
+
+    // Normalize AV income fields to match our expected format
+    const income = annualIncome.slice(0, 2).map(r => ({
+      revenue:   parseFloat(r.totalRevenue)  || 0,
+      netIncome: parseFloat(r.netIncome)     || 0,
+      date:      r.fiscalDateEnding
+    }));
+
+    // Normalize AV balance sheet fields
+    const bs = (annualBS || []).slice(0, 1).map(r => ({
+      cashAndCashEquivalents: parseFloat(r.cashAndCashEquivalentsAtCarryingValue) || 0,
+      shortTermInvestments:   parseFloat(r.shortTermInvestments) || 0,
+      totalDebt:              (parseFloat(r.shortLongTermDebtTotal) || 0) ||
+                              (parseFloat(r.longTermDebt) || 0) + (parseFloat(r.shortTermDebt) || 0),
+      date: r.fiscalDateEnding
+    }));
+
+    console.log('Alpha Vantage success');
+    return { income, bs, source: 'Alpha Vantage' };
+
+  } catch(e) {
+    console.error('Alpha Vantage error:', e);
     return { income: [], bs: [], source: null };
   }
+
 }
+
 
 async function fetchWeeklyChart(ticker) {
   const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1wk&range=5y`);
