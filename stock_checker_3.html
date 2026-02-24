@@ -1495,7 +1495,7 @@ function updateTwitterButtons(ticker, price, score, sentiment) {
   const tweetText = encodeURIComponent(
     `$${ticker} Health Check: ${score}/4 signals ✅\n` +
     `Price: $${price} | Market: ${sentiment}\n` +
-    `Analyzed with LeapScreener 📊`
+    `Analyzed with Leap Scanner 📊`
   );
   document.getElementById('tweetShareBtn').href  = `https://twitter.com/intent/tweet?text=${tweetText}`;
   document.getElementById('tweetSearchBtn').href = `https://twitter.com/search?q=%24${ticker}`;
