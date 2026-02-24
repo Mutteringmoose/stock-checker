@@ -36,8 +36,8 @@ min-height: 100vh;
 display: flex;
 flex-direction: column;
 align-items: center;
-justify-content: center;
-padding: 20px 20px;
+justify-content: flex-start;
+padding: 32px 20px 100px;
 overflow-x: hidden;
 }
 
@@ -66,8 +66,9 @@ z-index: 1;
 /* Header */
 .header {
 text-align: center;
-margin-bottom: 24px;
+margin-bottom: 28px;
 padding-top: 0;
+width: 100%;
 }
 
 .header h1 {
@@ -174,10 +175,11 @@ box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.05);
 background: var(–accent);
 color: var(–bg);
 border: none;
-border-radius: 8px;
-padding: 16px 28px;
+border-radius: 12px;
+padding: 18px 28px;
+width: 100%;
 font-family: ‘Barlow’, sans-serif;
-font-size: 14px;
+font-size: 16px;
 font-weight: 700;
 letter-spacing: 1.5px;
 text-transform: uppercase;
@@ -417,13 +419,27 @@ border-radius: 16px;
 padding: 18px 20px;
 margin-bottom: 28px;
 display: flex;
-align-items: center;
-gap: 14px;
+flex-direction: column;
+gap: 12px;
 opacity: 0;
 transform: translateY(10px);
 transition: all 0.4s ease;
 width: 100%;
 box-sizing: border-box;
+}
+
+.fg-top-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.fg-title {
+font-family: ‘Share Tech Mono’, monospace;
+font-size: 11px;
+letter-spacing: 2px;
+color: var(–muted);
+text-transform: uppercase;
 }
 
 .fg-widget.loaded { opacity: 1; transform: translateY(0); }
@@ -442,16 +458,13 @@ line-height: 1.3;
 max-height: 80px;
 }
 
-.fg-main { flex: 1; min-width: 0; width: 100%; }
-
 .fg-bar-wrap {
 width: 100%;
-height: 12px;
+height: 14px;
 background: rgba(255,255,255,0.08);
-border-radius: 8px;
+border-radius: 10px;
 overflow: visible;
 position: relative;
-margin-bottom: 10px;
 }
 
 .fg-bar {
@@ -498,11 +511,10 @@ letter-spacing: 0.3px;
 
 .fg-right {
 display: flex;
-flex-direction: column;
+flex-direction: row;
 align-items: center;
-gap: 4px;
+gap: 8px;
 flex-shrink: 0;
-min-width: 56px;
 }
 
 .fg-score {
@@ -918,20 +930,20 @@ margin-right: 6px;
 
   <div id="scannerPage">
   <div class="fg-widget" id="fgWidget">
-    <div class="fg-label">Market Sentiment</div>
-    <div class="fg-main">
-      <div class="fg-bar-wrap">
-        <div class="fg-bar" id="fgBar" style="width:0%"></div>
-        <div class="fg-needle" id="fgNeedle" style="left:0%"></div>
-      </div>
-      <div class="fg-axis-labels">
-        <span class="fg-axis-left">📈 Great time to buy</span>
-        <span class="fg-axis-right">💰 Stack cash</span>
+    <div class="fg-top-row">
+      <span class="fg-title">Market Sentiment</span>
+      <div class="fg-right">
+        <div class="fg-score" id="fgScore">--</div>
+        <div class="fg-sentiment" id="fgSentiment">Loading...</div>
       </div>
     </div>
-    <div class="fg-right">
-      <div class="fg-score" id="fgScore">--</div>
-      <div class="fg-sentiment" id="fgSentiment">Loading...</div>
+    <div class="fg-bar-wrap">
+      <div class="fg-bar" id="fgBar" style="width:0%"></div>
+      <div class="fg-needle" id="fgNeedle" style="left:0%"></div>
+    </div>
+    <div class="fg-axis-labels">
+      <span class="fg-axis-left">📈 Great time to buy</span>
+      <span class="fg-axis-right">💰 Stack cash</span>
     </div>
   </div>
 
