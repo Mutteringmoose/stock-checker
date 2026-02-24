@@ -660,6 +660,158 @@
 
   body { padding-bottom: 80px; }
 
+  /* Alert Badge */
+  .alert-badge {
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 10px;
+    padding: 2px 7px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .alert-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .alert-option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+
+  .alert-option:hover, .alert-option.selected {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.08);
+  }
+
+  .alert-opt-score {
+    font-size: 24px;
+    font-weight: 900;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+  }
+
+  .alert-opt-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .alert-off-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,61,87,0.08);
+    border: 1px solid rgba(255,61,87,0.2);
+    border-radius: 8px;
+    color: #ff3d57;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+
+  .alert-off-btn:hover { background: rgba(255,61,87,0.15); }
+
+  .modal-close {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: var(--text); }
+
+  .modal-note {
+    font-size: 11px;
+    color: var(--warn);
+    line-height: 1.4;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    z-index: 300;
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
   /* Footer */
   .footer {
     margin-top: 40px;
@@ -748,6 +900,27 @@
   </div> <!-- end scannerPage -->
 
   <div class="footer">Data via Yahoo Finance · FMP · CNN · For educational purposes only · Not financial advice</div>
+
+  <!-- Alert Threshold Modal -->
+  <div id="alertModal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeAlertModal()">
+    <div class="modal-box">
+      <div class="modal-title">Set Alert for <span id="alertModalTicker" style="color:var(--accent)"></span></div>
+      <p class="modal-sub">Notify me when this stock reaches a Leap Scanner score of:</p>
+      <div class="alert-options">
+        <button class="alert-option" data-val="3" onclick="setAlertThreshold('3')">
+          <span class="alert-opt-score">3/4</span>
+          <span class="alert-opt-label">Strong Setup</span>
+        </button>
+        <button class="alert-option" data-val="4" onclick="setAlertThreshold('4')">
+          <span class="alert-opt-score">4/4</span>
+          <span class="alert-opt-label">Strongest Setup</span>
+        </button>
+      </div>
+      <button class="alert-off-btn" onclick="setAlertThreshold('off')">🔕 Remove Alert</button>
+      <button class="modal-close" onclick="closeAlertModal()">Cancel</button>
+      <p class="modal-note">⚠️ Push notifications coming soon — alerts will show in-app for now</p>
+    </div>
+  </div>
 
   <!-- Bottom Nav -->
   <nav class="bottom-nav">
@@ -1212,11 +1385,12 @@ function renderWatchlist() {
       </div>
       <div style="display:flex;align-items:center;gap:10px;">
         <span style="font-size:11px;color:var(--muted);">${w.added}</span>
-        <button class="wl-bell ${w.alertOn ? 'bell-on' : ''}" 
+        <button class="wl-bell ${w.alertThreshold ? 'bell-on' : ''}" 
           onclick="event.stopPropagation();toggleAlert('${w.ticker}')" 
-          title="${w.alertOn ? 'SMS Alert ON (coming soon)' : 'Enable SMS alert when below 200D MA'}">
-          ${w.alertOn ? '🔔' : '🔕'}
+          title="${w.alertThreshold ? 'Alert: ' + w.alertThreshold + '/4 setup — click to change' : 'Set score alert'}">
+          ${w.alertThreshold ? '🔔' : '🔕'}
         </button>
+        ${w.alertThreshold ? `<span class="alert-badge">${w.alertThreshold}/4</span>` : ''}
         <button class="wl-remove" onclick="event.stopPropagation();removeFromWatchlist('${w.ticker}')">✕</button>
       </div>
     </div>
@@ -1232,14 +1406,54 @@ function loadTicker(ticker) {
 function toggleAlert(ticker) {
   const item = watchlist.find(w => w.ticker === ticker);
   if (!item) return;
-  item.alertOn = !item.alertOn;
-  localStorage.setItem('wl', JSON.stringify(watchlist));
-  if (item.alertOn) {
-    alert(`🔔 SMS alert enabled for ${ticker}!\n\nFull SMS notifications coming soon. We\'ll text you when ${ticker} drops below its 200-day moving average.`);
+
+  // Show modal
+  document.getElementById('alertModal').style.display = 'flex';
+  document.getElementById('alertModalTicker').textContent = ticker;
+  document.getElementById('alertModal').dataset.ticker = ticker;
+
+  // Pre-select current threshold
+  document.querySelectorAll('.alert-option').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.val === String(item.alertThreshold || ''));
+  });
+}
+
+function setAlertThreshold(val) {
+  const ticker = document.getElementById('alertModal').dataset.ticker;
+  const item   = watchlist.find(w => w.ticker === ticker);
+  if (!item) return;
+
+  if (val === 'off') {
+    item.alertThreshold = null;
   } else {
-    alert(`🔕 SMS alert disabled for ${ticker}.`);
+    item.alertThreshold = parseInt(val);
   }
+
+  localStorage.setItem('wl', JSON.stringify(watchlist));
+  closeAlertModal();
   renderWatchlist();
+
+  if (val !== 'off') {
+    showToast(`🔔 Alert set for ${ticker}: notify when score reaches ${val}/4`);
+  } else {
+    showToast(`🔕 Alert removed for ${ticker}`);
+  }
+}
+
+function closeAlertModal() {
+  document.getElementById('alertModal').style.display = 'none';
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
 // ── PROFILE ───────────────────────────────────────────
