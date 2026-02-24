@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Stock Health Checker</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #060a0f;
+    --surface: #0d1520;
+    --border: #1a2a3a;
+    --accent: #00d4ff;
+    --accent2: #00ff88;
+    --danger: #ff3d57;
+    --warn: #ffb800;
+    --text: #e0eaf5;
+    --muted: #4a6080;
+    --card: #0a1520;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .header .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* Search */
+  .search-wrap {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .search-wrap input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-wrap input::placeholder {
+    color: var(--muted);
+    letter-spacing: 2px;
+    font-size: 16px;
+  }
+
+  .search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.05);
+  }
+
+  .search-wrap button {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 16px 28px;
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .search-wrap button:hover {
+    background: #33ddff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+  }
+
+  .search-wrap button:active { transform: translateY(0); }
+  .search-wrap button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Stock info bar */
+  .stock-info {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 0 4px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
+
+  .stock-info.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stock-name {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  .stock-price {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  .stock-change {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .stock-change.up { background: rgba(0,255,136,0.15); color: var(--accent2); }
+  .stock-change.down { background: rgba(255,61,87,0.15); color: var(--danger); }
+
+  /* Score badge */
+  .score-badge {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .score-badge span {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* Cards */
+  .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .check-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .check-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .check-card.visible { opacity: 1; transform: translateY(0); }
+
+  .check-card.pass { border-color: rgba(0,255,136,0.2); }
+  .check-card.pass::before { background: var(--accent2); }
+  .check-card.fail { border-color: rgba(255,61,87,0.2); }
+  .check-card.fail::before { background: var(--danger); }
+  .check-card.loading { border-color: rgba(0,212,255,0.15); }
+
+  /* Icon */
+  .check-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .check-icon.pass { background: rgba(0,255,136,0.12); }
+  .check-icon.fail { background: rgba(255,61,87,0.12); }
+  .check-icon.loading {
+    background: rgba(0,212,255,0.08);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Content */
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .check-detail {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .check-detail .val {
+    color: var(--accent);
+  }
+
+  .check-detail .pass-val { color: var(--accent2); }
+  .check-detail .fail-val { color: var(--danger); }
+
+  /* Status pill */
+  .check-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .check-status.pass { background: rgba(0,255,136,0.12); color: var(--accent2); }
+  .check-status.fail { background: rgba(255,61,87,0.12); color: var(--danger); }
+  .check-status.loading { background: rgba(0,212,255,0.08); color: var(--muted); }
+
+  /* Verdict */
+  .verdict {
+    margin-top: 24px;
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.5s ease 0.6s;
+    background: var(--card);
+  }
+
+  .verdict.visible { opacity: 1; transform: translateY(0); }
+  .verdict.bullish { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.04); }
+  .verdict.bearish { border-color: rgba(255,61,87,0.3); background: rgba(255,61,87,0.04); }
+  .verdict.neutral { border-color: rgba(255,184,0,0.3); background: rgba(255,184,0,0.04); }
+
+  .verdict-icon { font-size: 28px; }
+
+  .verdict-text .verdict-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .verdict-text .verdict-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .verdict.bullish .verdict-title { color: var(--accent2); }
+  .verdict.bearish .verdict-title { color: var(--danger); }
+  .verdict.neutral .verdict-title { color: var(--warn); }
+
+  /* Error */
+  .error-msg {
+    text-align: center;
+    padding: 24px;
+    color: var(--danger);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    display: none;
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* Spinner in button */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(6,10,15,0.3);
+    border-top-color: var(--bg);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div class="label">Stock Analysis Tool</div>
+    <h1>Health Check</h1>
+    <p>Enter a ticker to instantly analyze technical & fundamental signals</p>
+  </div>
+
+  <div class="search-wrap">
+    <input type="text" id="tickerInput" placeholder="MSFT, AAPL, NVDA..." maxlength="10"/>
+    <button id="analyzeBtn" onclick="analyze()">Analyze</button>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+
+  <div class="stock-info" id="stockInfo">
+    <div class="stock-name" id="stockName"></div>
+    <div class="stock-price" id="stockPrice"></div>
+    <div class="stock-change" id="stockChange"></div>
+    <div class="score-badge">Score: <span id="scoreVal">—</span>/4</div>
+  </div>
+
+  <div class="checks" id="checksContainer"></div>
+  <div class="verdict" id="verdict">
+    <div class="verdict-icon" id="verdictIcon"></div>
+    <div class="verdict-text">
+      <div class="verdict-title" id="verdictTitle"></div>
+      <div class="verdict-sub" id="verdictSub"></div>
+    </div>
+  </div>
+
+  <div class="footer">Data via Yahoo Finance · For educational purposes only · Not financial advice</div>
+</div>
+
+<script>
+const CHECKS = [
+  {
+    id: 'ma200d',
+    title: 'At or Below 200-Day Moving Average',
+    desc: 'Price ≤ 200-day MA suggests potential undervaluation or oversold conditions'
+  },
+  {
+    id: 'rsi30',
+    title: 'RSI At or Below 30 (Oversold)',
+    desc: 'RSI ≤ 30 indicates the stock may be oversold and due for a bounce'
+  },
+  {
+    id: 'balance',
+    title: 'Healthy Balance Sheet',
+    desc: 'Growing profit margins + enough cash to cover total debt'
+  },
+  {
+    id: 'ma200w',
+    title: 'At or Below 200-Week Moving Average',
+    desc: 'Long-term technical support — historically strong buy zones'
+  }
+];
+
+function renderSkeletons() {
+  const container = document.getElementById('checksContainer');
+  container.innerHTML = '';
+  CHECKS.forEach((c, i) => {
+    const card = document.createElement('div');
+    card.className = 'check-card loading';
+    card.id = `card-${c.id}`;
+    card.innerHTML = `
+      <div class="check-icon loading">⟳</div>
+      <div class="check-content">
+        <div class="check-title">${c.title}</div>
+        <div class="check-detail">Fetching data...</div>
+      </div>
+      <div class="check-status loading">LOADING</div>
+    `;
+    container.appendChild(card);
+    setTimeout(() => card.classList.add('visible'), 80 * i);
+  });
+}
+
+function updateCard(id, pass, detail) {
+  const card = document.getElementById(`card-${id}`);
+  if (!card) return;
+  card.className = `check-card ${pass ? 'pass' : 'fail'} visible`;
+  const check = CHECKS.find(c => c.id === id);
+  card.innerHTML = `
+    <div class="check-icon ${pass ? 'pass' : 'fail'}">${pass ? '✓' : '✗'}</div>
+    <div class="check-content">
+      <div class="check-title">${check.title}</div>
+      <div class="check-detail">${detail}</div>
+    </div>
+    <div class="check-status ${pass ? 'pass' : 'fail'}">${pass ? 'PASS' : 'FAIL'}</div>
+  `;
+}
+
+function showError(msg) {
+  const el = document.getElementById('errorMsg');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+function hideError() {
+  document.getElementById('errorMsg').style.display = 'none';
+}
+
+const PROXY = 'https://corsproxy.io/?';
+const FMP_KEY = 'mDVQDxm4cPbho1wvfMbTgEF4jcJEsLxj'; // <-- PASTE YOUR FMP API KEY HERE
+
+async function fetchYahoo(ticker) {
+  const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`);
+  const chartRes = await fetch(url);
+  const chart = await chartRes.json();
+
+  return { chart, summary: null };
+}
+
+async function fetchFMPFundamentals(ticker) {
+  // FMP supports CORS natively - call directly without proxy
+  const incomeUrl = `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?period=annual&limit=2&apikey=${FMP_KEY}`;
+  const bsUrl     = `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?period=annual&limit=2&apikey=${FMP_KEY}`;
+
+  const [incomeRes, bsRes] = await Promise.all([
+    fetch(incomeUrl),
+    fetch(bsUrl)
+  ]);
+
+  const income = await incomeRes.json();
+  const bs     = await bsRes.json();
+
+  return {
+    income: Array.isArray(income) ? income : [],
+    bs:     Array.isArray(bs)     ? bs     : []
+  };
+}
+
+async function fetchWeeklyChart(ticker) {
+  const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1wk&range=5y`);
+  const res = await fetch(url);
+  return res.json();
+}
+
+function calcSMA(prices, period) {
+  if (prices.length < period) return null;
+  const slice = prices.slice(-period);
+  return slice.reduce((a, b) => a + b, 0) / period;
+}
+
+function calcRSI(prices, period = 14) {
+  if (prices.length < period + 1) return null;
+  const changes = [];
+  for (let i = 1; i < prices.length; i++) {
+    changes.push(prices[i] - prices[i - 1]);
+  }
+  const recent = changes.slice(-period);
+  const gains = recent.filter(c => c > 0);
+  const losses = recent.filter(c => c < 0).map(c => Math.abs(c));
+  const avgGain = gains.length ? gains.reduce((a, b) => a + b, 0) / period : 0;
+  const avgLoss = losses.length ? losses.reduce((a, b) => a + b, 0) / period : 0;
+  if (avgLoss === 0) return 100;
+  const rs = avgGain / avgLoss;
+  return 100 - (100 / (1 + rs));
+}
+
+async function analyze() {
+  const input = document.getElementById('tickerInput');
+  const ticker = input.value.trim().toUpperCase();
+  if (!ticker) return;
+
+  hideError();
+  document.getElementById('verdict').className = 'verdict';
+  document.getElementById('stockInfo').className = 'stock-info';
+
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>Analyzing...';
+
+  renderSkeletons();
+
+  try {
+    const [dailyData, weeklyData, fmpData] = await Promise.all([
+      fetchYahoo(ticker),
+      fetchWeeklyChart(ticker),
+      fetchFMPFundamentals(ticker)
+    ]);
+
+    // --- Parse daily chart ---
+    const chartResult = dailyData.chart?.chart?.result?.[0];
+    if (!chartResult) throw new Error(`Ticker "${ticker}" not found`);
+
+    const closes = chartResult.indicators.quote[0].close.filter(v => v != null);
+    const currentPrice = closes[closes.length - 1];
+    const prevPrice = closes[closes.length - 2];
+    const change = ((currentPrice - prevPrice) / prevPrice * 100);
+
+    // Stock info bar
+    const meta = chartResult.meta;
+    const name = meta.symbol;
+    document.getElementById('stockName').textContent = name;
+    document.getElementById('stockPrice').textContent = `$${currentPrice.toFixed(2)}`;
+    const changeEl = document.getElementById('stockChange');
+    changeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+    changeEl.className = `stock-change ${change >= 0 ? 'up' : 'down'}`;
+    document.getElementById('stockInfo').className = 'stock-info visible';
+
+    // --- CHECK 1: 200-day MA ---
+    const ma200d = calcSMA(closes, 200);
+    const pass1 = ma200d !== null && currentPrice <= ma200d;
+    updateCard('ma200d', pass1,
+      ma200d
+        ? `Price: <span class="${pass1 ? 'pass-val' : 'fail-val'}">$${currentPrice.toFixed(2)}</span> · 200D MA: <span class="val">$${ma200d.toFixed(2)}</span> · ${pass1 ? 'Price is BELOW MA — potential value zone' : 'Price is ABOVE MA — not yet at support'}`
+        : 'Insufficient data for 200-day MA'
+    );
+
+    // --- CHECK 2: RSI ---
+    const rsi = calcRSI(closes, 14);
+    const pass2 = rsi !== null && rsi <= 30;
+    updateCard('rsi30', pass2,
+      rsi
+        ? `RSI(14): <span class="${pass2 ? 'pass-val' : 'fail-val'}">${rsi.toFixed(1)}</span> · ${pass2 ? 'OVERSOLD — historically a strong buy signal' : rsi <= 40 ? 'Approaching oversold territory' : 'Not oversold yet'}`
+        : 'Insufficient data for RSI'
+    );
+
+    // --- CHECK 3: Balance Sheet ---
+    // --- CHECK 3: Balance Sheet via FMP ---
+    let pass3 = false;
+    let balanceDetail = 'Could not fetch fundamental data. Check your FMP API key.';
+
+    if (fmpData?.income?.length > 0 && fmpData?.bs?.length > 0) {
+      const inc  = fmpData.income[0];
+      const inc1 = fmpData.income[1];
+      const bs   = fmpData.bs[0];
+
+      const netMargin = inc.revenue > 0 ? inc.netIncome / inc.revenue : null;
+      const totalCash = (bs.cashAndCashEquivalents || 0) + (bs.shortTermInvestments || 0);
+      const totalDebt = bs.totalDebt || bs.longTermDebt || 0;
+      const revGrowth = inc1 && inc1.revenue > 0 ? (inc.revenue - inc1.revenue) / inc1.revenue : null;
+
+      const hasMargin  = netMargin != null && netMargin > 0;
+      const canPayDebt = totalDebt === 0 ? true : (totalCash >= totalDebt * 0.5);
+      pass3 = hasMargin && canPayDebt;
+
+      const marginStr = netMargin != null ? `${(netMargin * 100).toFixed(1)}%` : 'N/A';
+      const cashStr   = `$${(totalCash / 1e9).toFixed(2)}B`;
+      const debtStr   = `$${(totalDebt / 1e9).toFixed(2)}B`;
+      const ratio     = totalDebt > 0 ? (totalCash / totalDebt).toFixed(2) + 'x' : 'Debt-free ✓';
+      const revStr    = revGrowth != null ? ` · Rev Growth: <span class="${revGrowth > 0 ? 'pass-val' : 'fail-val'}">${(revGrowth*100).toFixed(1)}%</span>` : '';
+
+      balanceDetail = `Net Margin: <span class="${hasMargin ? 'pass-val' : 'fail-val'}">${marginStr}</span> · Cash: <span class="val">${cashStr}</span> · Debt: <span class="val">${debtStr}</span> · Cash/Debt: <span class="${canPayDebt ? 'pass-val' : 'fail-val'}">${ratio}</span>${revStr}`;
+    }
+
+    updateCard('balance', pass3, balanceDetail);
+
+    // --- CHECK 4: 200-week MA ---
+    const weeklyResult = weeklyData?.chart?.result?.[0];
+    let pass4 = false;
+    let weeklyDetail = 'Insufficient weekly data';
+
+    if (weeklyResult) {
+      const weeklyCloses = weeklyResult.indicators.quote[0].close.filter(v => v != null);
+      const ma200w = calcSMA(weeklyCloses, 200);
+      pass4 = ma200w !== null && currentPrice <= ma200w;
+      weeklyDetail = ma200w
+        ? `Price: <span class="${pass4 ? 'pass-val' : 'fail-val'}">$${currentPrice.toFixed(2)}</span> · 200W MA: <span class="val">$${ma200w.toFixed(2)}</span> · ${pass4 ? 'Price is BELOW weekly MA — long-term value zone' : 'Price is ABOVE weekly MA'}`
+        : 'Need 200+ weeks of data for this check';
+    }
+
+    updateCard('ma200w', pass4, weeklyDetail);
+
+    // --- Verdict ---
+    const score = [pass1, pass2, pass3, pass4].filter(Boolean).length;
+    document.getElementById('scoreVal').textContent = score;
+
+    const verdictEl = document.getElementById('verdict');
+    const verdictIcon = document.getElementById('verdictIcon');
+    const verdictTitle = document.getElementById('verdictTitle');
+    const verdictSub = document.getElementById('verdictSub');
+
+    if (score === 4) {
+      verdictEl.className = 'verdict bullish visible';
+      verdictIcon.textContent = '🎯';
+      verdictTitle.textContent = 'Strong Buy Signal — All 4 Checks Pass';
+      verdictSub.textContent = 'Technically oversold, fundamentally sound, and at long-term support. High-conviction entry zone.';
+    } else if (score === 3) {
+      verdictEl.className = 'verdict bullish visible';
+      verdictIcon.textContent = '📈';
+      verdictTitle.textContent = 'Bullish Setup — 3 of 4 Checks Pass';
+      verdictSub.textContent = 'Strong setup. Consider waiting for the remaining signal before entering.';
+    } else if (score === 2) {
+      verdictEl.className = 'verdict neutral visible';
+      verdictIcon.textContent = '⚖️';
+      verdictTitle.textContent = 'Mixed Signals — 2 of 4 Checks Pass';
+      verdictSub.textContent = 'Some positive signals but not a high-conviction setup. Watch for further confirmation.';
+    } else if (score === 1) {
+      verdictEl.className = 'verdict bearish visible';
+      verdictIcon.textContent = '⚠️';
+      verdictTitle.textContent = 'Weak Setup — Only 1 Check Passes';
+      verdictSub.textContent = 'Most signals are not favorable. Not an ideal entry point based on your criteria.';
+    } else {
+      verdictEl.className = 'verdict bearish visible';
+      verdictIcon.textContent = '🚫';
+      verdictTitle.textContent = 'No Buy Signal — 0 of 4 Checks Pass';
+      verdictSub.textContent = 'Stock does not meet any of your entry criteria. Wait for a better setup.';
+    }
+
+  } catch (err) {
+    document.getElementById('checksContainer').innerHTML = '';
+    showError(`Error: ${err.message}. Check the ticker symbol and try again.`);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = 'Analyze';
+}
+
+// Enter key support
+document.getElementById('tickerInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') analyze();
+});
+</script>
+</body>
+</html>
