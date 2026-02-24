@@ -1598,44 +1598,42 @@ async function analyze() {
 
   hideError();
 
-  // Resolve company name → ticker
-  // Real tickers are 1-4 chars (AAPL, MSFT, NVDA) or known 5-char ones (GOOGL, META was 4)
-  // If user types a word like "Apple" or "APPLE" we search FMP to resolve it
   const upperRaw = raw.toUpperCase();
-  // Only treat as direct ticker if: all caps, max 4 chars, no spaces
-  // 5-char inputs always go through search to catch "APPLE", "TESLA", etc.
-  const isDirectTicker = /^[A-Z]{1,4}$/.test(upperRaw) && raw === raw.toUpperCase();
   let ticker;
 
-  if (isDirectTicker) {
+  // Pure ticker: 1-5 uppercase letters, no spaces → skip search
+  const isPureTicker = /^[A-Z]{1,5}$/.test(upperRaw) && raw.trim() === upperRaw;
+
+  if (isPureTicker) {
     ticker = upperRaw;
   } else {
-    // Show searching state
-    const btn = document.getElementById('analyzeBtn');
-    const origLabel = btn.innerHTML;
-    btn.innerHTML = '<span class="spinner"></span>Searching...';
-    btn.disabled = true;
+    // Company name entered — search FMP
+    const btn2 = document.getElementById('analyzeBtn');
+    const origLabel = btn2.innerHTML;
+    btn2.innerHTML = '<span class="spinner"></span>Searching...';
+    btn2.disabled = true;
     try {
-      const searchRes  = await fetch(`https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(raw)}&limit=10&exchange=NASDAQ,NYSE,AMEX&apikey=${FMP_KEY}`);
+      const searchRes  = await fetch(`https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(raw)}&limit=10&apikey=${FMP_KEY}`);
       const searchData = await searchRes.json();
-      const results    = Array.isArray(searchData) ? searchData : (searchData?.data || []);
-      // Prefer US exchanges
-      const match = results.find(r => ['NASDAQ','NYSE','AMEX','NYSE ARCA'].includes(r.exchangeShortName || r.stockExchange))
-                 || results[0];
+      const results    = Array.isArray(searchData) ? searchData : [];
+      const usExchanges = ['NASDAQ','NYSE','AMEX','NYSE ARCA','NYSEArca'];
+      const match = results.find(r => usExchanges.includes(r.exchangeShortName)) || results[0];
       if (!match?.symbol) {
-        showError(`No stock found for "${raw}". Try the ticker symbol (e.g. AAPL).`);
-        btn.innerHTML = origLabel;
-        btn.disabled  = false;
+        showError(`No stock found for "${raw}". Try the ticker symbol directly (e.g. RKT).`);
+        btn2.innerHTML = origLabel;
+        btn2.disabled  = false;
         return;
       }
       ticker = match.symbol.toUpperCase();
-      input.value = ticker; // Show resolved ticker in the box
+      input.value = ticker;
     } catch(e) {
       showError('Search failed. Please enter a ticker symbol directly.');
-      btn.innerHTML = origLabel;
-      btn.disabled  = false;
+      btn2.innerHTML = origLabel;
+      btn2.disabled  = false;
       return;
     }
+    btn2.innerHTML = origLabel;
+    btn2.disabled  = false;
   }
   document.getElementById('verdict').className = 'verdict';
   document.getElementById('stockInfo').className = 'stock-info';
