@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Stock Health Checker</title>
+<title>Leap Scanner</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -354,6 +354,312 @@
     display: none;
   }
 
+  /* Fear & Greed Widget */
+  .fg-widget {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 24px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
+
+  .fg-widget.loaded { opacity: 1; transform: translateY(0); }
+
+  .fg-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+  }
+
+  .fg-main { flex: 1; }
+
+  .fg-bar-wrap {
+    width: 100%;
+    height: 8px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: visible;
+    position: relative;
+    margin-bottom: 8px;
+  }
+
+  .fg-bar {
+    height: 100%;
+    border-radius: 6px;
+    transition: width 1s ease;
+    background: linear-gradient(90deg, #ff3d57 0%, #ff8c00 25%, #ffb800 50%, #64dc64 75%, #00ff88 100%);
+    width: 100% !important;
+  }
+
+  .fg-needle {
+    position: absolute;
+    top: -4px;
+    width: 3px;
+    height: 16px;
+    background: white;
+    border-radius: 2px;
+    transform: translateX(-50%);
+    transition: left 1s ease;
+    box-shadow: 0 0 6px rgba(255,255,255,0.6);
+  }
+
+  .fg-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fg-axis-left {
+    font-size: 10px;
+    color: #ff3d57;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .fg-axis-right {
+    font-size: 10px;
+    color: #00ff88;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+
+  .fg-right {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .fg-score {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .fg-sentiment {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .fg-sentiment.extreme-fear  { background: rgba(255,61,87,0.15);   color: #ff3d57; }
+  .fg-sentiment.fear          { background: rgba(255,140,0,0.15);   color: #ff8c00; }
+  .fg-sentiment.neutral       { background: rgba(255,184,0,0.15);   color: #ffb800; }
+  .fg-sentiment.greed         { background: rgba(100,220,100,0.15); color: #64dc64; }
+  .fg-sentiment.extreme-greed { background: rgba(0,255,136,0.15);   color: #00ff88; }
+
+  /* Twitter Buttons */
+  .twitter-btns {
+    display: flex !important;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+
+  .tw-share {
+    background: rgba(29,161,242,0.12);
+    color: #1da1f2;
+    border-color: rgba(29,161,242,0.3);
+  }
+
+  .tw-search {
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    border-color: rgba(0,212,255,0.2);
+  }
+
+  .tw-btn:hover { transform: translateY(-2px); opacity: 0.85; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(6,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 24px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn:hover  { color: var(--text); }
+
+  .nav-icon  { font-size: 20px; }
+  .nav-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+
+  /* Tab panels */
+  .tab-panel { padding-bottom: 80px; }
+
+  .tab-title {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  /* Watchlist */
+  .watchlist-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+  .watchlist-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .watchlist-item:hover { border-color: var(--accent); }
+
+  .wl-left { display: flex; align-items: center; gap: 14px; }
+  .wl-ticker { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+  .wl-price  { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent); }
+  .wl-score  { font-family: 'Share Tech Mono', monospace; font-size: 12px; padding: 3px 10px; border-radius: 20px; }
+  .wl-score.high { background: rgba(0,255,136,0.12); color: var(--accent2); }
+  .wl-score.mid  { background: rgba(255,184,0,0.12);  color: var(--warn); }
+  .wl-score.low  { background: rgba(255,61,87,0.12);  color: var(--danger); }
+  .wl-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 4px; }
+  .wl-remove:hover { color: var(--danger); }
+  .wl-bell { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.5; transition: opacity 0.2s; }
+  .wl-bell:hover { opacity: 1; }
+  .wl-bell.bell-on { opacity: 1; }
+  .profile-fields { display: flex; flex-direction: column; gap: 14px; }
+  .profile-field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+  .field-note  { font-size: 11px; color: var(--warn); margin-top: 4px; }
+
+  .add-watchlist-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    display: none;
+  }
+
+  .add-watchlist-btn:hover { background: rgba(0,212,255,0.15); }
+
+  /* Profile */
+  .profile-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .profile-avatar { font-size: 48px; margin-bottom: 12px; }
+  .profile-name   { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+  .profile-sub    { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; font-family: 'Share Tech Mono', monospace; }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 12px;
+    text-align: center;
+  }
+
+  .stat-val { font-size: 28px; font-weight: 900; color: var(--accent); font-family: 'Share Tech Mono', monospace; }
+  .stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+  .profile-edit { display: flex; gap: 10px; }
+
+  .name-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .name-input:focus { border-color: var(--accent); }
+
+  .save-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .save-btn:hover { opacity: 0.85; }
+
+  body { padding-bottom: 80px; }
+
   /* Footer */
   .footer {
     margin-top: 40px;
@@ -385,9 +691,28 @@
 <div class="container">
 
   <div class="header">
-    <div class="label">Stock Analysis Tool</div>
-    <h1>Health Check</h1>
-    <p>Enter a ticker to instantly analyze technical & fundamental signals</p>
+    <div class="label">Leap Scanner</div>
+    <h1>Leap Scanner</h1>
+    <p>Enter a ticker to run a full health check on any stock</p>
+  </div>
+
+  <!-- Fear & Greed Widget -->
+  <div class="fg-widget" id="fgWidget">
+    <div class="fg-label">Market Sentiment</div>
+    <div class="fg-main">
+      <div class="fg-bar-wrap">
+        <div class="fg-bar" id="fgBar" style="width:0%"></div>
+        <div class="fg-needle" id="fgNeedle" style="left:0%"></div>
+      </div>
+      <div class="fg-axis-labels">
+        <span class="fg-axis-left">📈 Great time to buy</span>
+        <span class="fg-axis-right">💰 Stack cash</span>
+      </div>
+    </div>
+    <div class="fg-right">
+      <div class="fg-score" id="fgScore">--</div>
+      <div class="fg-sentiment" id="fgSentiment">Loading...</div>
+    </div>
   </div>
 
   <div class="search-wrap">
@@ -413,7 +738,80 @@
     </div>
   </div>
 
-  <div class="footer">Data via Yahoo Finance · For educational purposes only · Not financial advice</div>
+  <!-- Twitter Buttons -->
+  <div class="twitter-btns" id="twitterBtns" style="display:none; margin-top:16px; gap:10px; display:none; flex-direction:row; justify-content:center;">
+    <a id="tweetShareBtn" href="#" target="_blank" class="tw-btn tw-share">🐦 Tweet This Analysis</a>
+    <a id="tweetSearchBtn" href="#" target="_blank" class="tw-btn tw-search">🔍 View $TICKER on X</a>
+  </div>
+
+  <div class="footer">Data via Yahoo Finance · FMP · CNN · For educational purposes only · Not financial advice</div>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Scanner</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('watchlist')" id="nav-watchlist">
+      <span class="nav-icon">⭐</span>
+      <span class="nav-label">Watchlist</span>
+    </button>
+    <button class="nav-btn" onclick="showTab('profile')" id="nav-profile">
+      <span class="nav-icon">👤</span>
+      <span class="nav-label">Profile</span>
+    </button>
+  </nav>
+
+  <!-- Watchlist Tab -->
+  <div class="tab-panel" id="tab-watchlist" style="display:none;">
+    <h2 class="tab-title">Watchlist</h2>
+    <div class="watchlist-empty" id="watchlistEmpty">
+      <div style="font-size:40px; margin-bottom:12px;">⭐</div>
+      <p>Your watchlist is empty.</p>
+      <p style="color:var(--muted); font-size:13px; margin-top:6px;">Analyze a stock and click "Add to Watchlist" to save it here.</p>
+    </div>
+    <div id="watchlistItems"></div>
+  </div>
+
+  <!-- Profile Tab -->
+  <div class="tab-panel" id="tab-profile" style="display:none;">
+    <h2 class="tab-title">Profile</h2>
+    <div class="profile-card">
+      <div class="profile-avatar">👤</div>
+      <div class="profile-name" id="profileName">Investor</div>
+      <div class="profile-sub">LeapScreener Member</div>
+    </div>
+    <div class="profile-stats">
+      <div class="stat-box">
+        <div class="stat-val" id="statScanned">0</div>
+        <div class="stat-lbl">Stocks Scanned</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statWatchlist">0</div>
+        <div class="stat-lbl">Watchlist</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-val" id="statPassed">0</div>
+        <div class="stat-lbl">Passed 3+/4</div>
+      </div>
+    </div>
+    <div class="profile-fields">
+      <div class="profile-field-group">
+        <label class="field-label">Username</label>
+        <input type="text" id="nameInput" placeholder="Enter username..." class="name-input"/>
+      </div>
+      <div class="profile-field-group">
+        <label class="field-label">Email</label>
+        <input type="email" id="emailInput" placeholder="Enter email..." class="name-input"/>
+      </div>
+      <div class="profile-field-group">
+        <label class="field-label">Password</label>
+        <input type="password" id="passInput" placeholder="Set password..." class="name-input"/>
+        <span class="field-note">⚠️ Saved locally only — full auth coming soon</span>
+      </div>
+      <button onclick="saveProfile()" class="save-btn" style="width:100%;margin-top:8px;">Save Profile</button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -486,6 +884,38 @@ function hideError() {
 }
 
 const PROXY = 'https://corsproxy.io/?';
+
+async function loadFearGreed() {
+  try {
+    const url = PROXY + encodeURIComponent('https://production.dataviz.cnn.io/index/fearandgreed/graphdata');
+    const res  = await fetch(url);
+    const data = await res.json();
+    const score = Math.round(data?.fear_and_greed?.score || data?.score || 50);
+    let sentiment, cls;
+    if      (score <= 25) { sentiment = 'Extreme Fear';  cls = 'extreme-fear';  }
+    else if (score <= 45) { sentiment = 'Fear';          cls = 'fear';          }
+    else if (score <= 55) { sentiment = 'Neutral';       cls = 'neutral';       }
+    else if (score <= 75) { sentiment = 'Greed';         cls = 'greed';         }
+    else                  { sentiment = 'Extreme Greed'; cls = 'extreme-greed'; }
+
+    document.getElementById('fgScore').textContent     = score;
+    document.getElementById('fgSentiment').textContent = sentiment;
+    document.getElementById('fgSentiment').className   = `fg-sentiment ${cls}`;
+    document.getElementById('fgBar').style.width       = `100%`;
+    document.getElementById('fgNeedle').style.left     = `${score}%`;
+
+    // Color the score number
+    const colors = { 'extreme-fear': '#ff3d57', 'fear': '#ff8c00', 'neutral': '#ffb800', 'greed': '#64dc64', 'extreme-greed': '#00ff88' };
+    document.getElementById('fgScore').style.color = colors[cls];
+    document.getElementById('fgWidget').classList.add('loaded');
+  } catch(e) {
+    document.getElementById('fgSentiment').textContent = 'Unavailable';
+    document.getElementById('fgWidget').classList.add('loaded');
+  }
+}
+
+// Load fear & greed on page load
+window.addEventListener('load', loadFearGreed);
 const FMP_KEY = 'mDVQDxm4cPbho1wvfMbTgEF4jcJEsLxj'; // <-- PASTE YOUR FMP API KEY HERE
 
 async function fetchYahoo(ticker) {
@@ -497,22 +927,27 @@ async function fetchYahoo(ticker) {
 }
 
 async function fetchFMPFundamentals(ticker) {
-  // FMP supports CORS natively - call directly without proxy
-  const incomeUrl = `https://financialmodelingprep.com/api/v3/income-statement/${ticker}?period=annual&limit=2&apikey=${FMP_KEY}`;
-  const bsUrl     = `https://financialmodelingprep.com/api/v3/balance-sheet-statement/${ticker}?period=annual&limit=2&apikey=${FMP_KEY}`;
+  // FMP stable endpoints (new format for accounts created after Aug 2025)
+  const incomeUrl = `https://financialmodelingprep.com/stable/income-statement?symbol=${ticker}&period=annual&limit=2&apikey=${FMP_KEY}`;
+  const bsUrl     = `https://financialmodelingprep.com/stable/balance-sheet-statement?symbol=${ticker}&period=annual&limit=2&apikey=${FMP_KEY}`;
 
-  const [incomeRes, bsRes] = await Promise.all([
-    fetch(incomeUrl),
-    fetch(bsUrl)
-  ]);
+  try {
+    const [incomeRes, bsRes] = await Promise.all([
+      fetch(incomeUrl),
+      fetch(bsUrl)
+    ]);
 
-  const income = await incomeRes.json();
-  const bs     = await bsRes.json();
+    const incomeData = await incomeRes.json();
+    const bsData     = await bsRes.json();
 
-  return {
-    income: Array.isArray(income) ? income : [],
-    bs:     Array.isArray(bs)     ? bs     : []
-  };
+    const income = incomeData?.data || (Array.isArray(incomeData) ? incomeData : []);
+    const bs     = bsData?.data     || (Array.isArray(bsData)     ? bsData     : []);
+
+    return { income, bs };
+  } catch(e) {
+    console.error('FMP fetch error:', e);
+    return { income: [], bs: [] };
+  }
 }
 
 async function fetchWeeklyChart(ticker) {
@@ -684,6 +1119,25 @@ async function analyze() {
       verdictSub.textContent = 'Stock does not meet any of your entry criteria. Wait for a better setup.';
     }
 
+    // Update Twitter buttons
+    const fgSentiment = document.getElementById('fgSentiment')?.textContent || 'Unknown';
+    updateTwitterButtons(ticker, currentPrice.toFixed(2), score, fgSentiment);
+
+    // Update profile stats
+    updateStats(score);
+
+    // Show add to watchlist button
+    let wlBtn = document.getElementById('addWlBtn');
+    if (!wlBtn) {
+      wlBtn = document.createElement('button');
+      wlBtn.id = 'addWlBtn';
+      wlBtn.className = 'add-watchlist-btn';
+      document.getElementById('verdict').after(wlBtn);
+    }
+    wlBtn.textContent = `⭐ Add ${ticker} to Watchlist`;
+    wlBtn.style.display = 'block';
+    wlBtn.onclick = () => addToWatchlist(ticker, currentPrice.toFixed(2), score);
+
   } catch (err) {
     document.getElementById('checksContainer').innerHTML = '';
     showError(`Error: ${err.message}. Check the ticker symbol and try again.`);
@@ -691,6 +1145,154 @@ async function analyze() {
 
   btn.disabled = false;
   btn.innerHTML = 'Analyze';
+}
+
+// ── TAB NAVIGATION ──────────────────────────────────
+const mainContent = ['header','fgWidget','search-wrap-id','stockInfo','checksContainer','verdict','twitterBtns','add-wl-btn'];
+
+function showTab(tab) {
+  // Update nav buttons
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(`nav-${tab}`).classList.add('active');
+
+  const isHome = tab === 'home';
+
+  // Home-only elements
+  document.querySelector('.header').style.display          = isHome ? '' : 'none';
+  document.querySelector('.search-wrap').style.display     = isHome ? '' : 'none';
+  document.getElementById('fgWidget').style.display        = isHome ? '' : 'none';
+  document.getElementById('errorMsg').style.display        = 'none';
+  document.getElementById('stockInfo').style.display       = isHome ? '' : 'none';
+  document.getElementById('checksContainer').style.display = isHome ? '' : 'none';
+  document.getElementById('verdict').style.display         = isHome ? '' : 'none';
+  document.getElementById('twitterBtns').style.display     = 'none';
+  const wlBtn = document.getElementById('addWlBtn');
+  if (wlBtn) wlBtn.style.display = isHome ? '' : 'none';
+
+  // Tab panels
+  document.getElementById('tab-watchlist').style.display = tab === 'watchlist' ? '' : 'none';
+  document.getElementById('tab-profile').style.display   = tab === 'profile'   ? '' : 'none';
+
+  if (tab === 'watchlist') renderWatchlist();
+  if (tab === 'profile')   renderProfile();
+}
+
+// ── WATCHLIST ─────────────────────────────────────────
+let watchlist = JSON.parse(localStorage.getItem('wl') || '[]');
+
+function addToWatchlist(ticker, price, score) {
+  if (watchlist.find(w => w.ticker === ticker)) {
+    alert(`${ticker} is already in your watchlist!`);
+    return;
+  }
+  watchlist.push({ ticker, price, score, added: new Date().toLocaleDateString() });
+  localStorage.setItem('wl', JSON.stringify(watchlist));
+  updateStats();
+  alert(`${ticker} added to watchlist!`);
+}
+
+function removeFromWatchlist(ticker) {
+  watchlist = watchlist.filter(w => w.ticker !== ticker);
+  localStorage.setItem('wl', JSON.stringify(watchlist));
+  renderWatchlist();
+  updateStats();
+}
+
+function renderWatchlist() {
+  const container = document.getElementById('watchlistItems');
+  const empty     = document.getElementById('watchlistEmpty');
+  if (watchlist.length === 0) {
+    empty.style.display     = '';
+    container.innerHTML     = '';
+    return;
+  }
+  empty.style.display = 'none';
+  container.innerHTML = watchlist.map(w => `
+    <div class="watchlist-item" onclick="loadTicker('${w.ticker}')">
+      <div class="wl-left">
+        <div class="wl-ticker">${w.ticker}</div>
+        <div class="wl-price">$${w.price}</div>
+        <div class="wl-score ${w.score >= 3 ? 'high' : w.score >= 2 ? 'mid' : 'low'}">${w.score}/4</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:11px;color:var(--muted);">${w.added}</span>
+        <button class="wl-bell ${w.alertOn ? 'bell-on' : ''}" 
+          onclick="event.stopPropagation();toggleAlert('${w.ticker}')" 
+          title="${w.alertOn ? 'SMS Alert ON (coming soon)' : 'Enable SMS alert when below 200D MA'}">
+          ${w.alertOn ? '🔔' : '🔕'}
+        </button>
+        <button class="wl-remove" onclick="event.stopPropagation();removeFromWatchlist('${w.ticker}')">✕</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadTicker(ticker) {
+  showTab('home');
+  document.getElementById('tickerInput').value = ticker;
+  analyze();
+}
+
+function toggleAlert(ticker) {
+  const item = watchlist.find(w => w.ticker === ticker);
+  if (!item) return;
+  item.alertOn = !item.alertOn;
+  localStorage.setItem('wl', JSON.stringify(watchlist));
+  if (item.alertOn) {
+    alert(`🔔 SMS alert enabled for ${ticker}!\n\nFull SMS notifications coming soon. We\'ll text you when ${ticker} drops below its 200-day moving average.`);
+  } else {
+    alert(`🔕 SMS alert disabled for ${ticker}.`);
+  }
+  renderWatchlist();
+}
+
+// ── PROFILE ───────────────────────────────────────────
+let stats = JSON.parse(localStorage.getItem('stats') || '{"scanned":0,"passed":0}');
+
+function updateStats(score) {
+  if (score !== undefined) {
+    stats.scanned++;
+    if (score >= 3) stats.passed++;
+    localStorage.setItem('stats', JSON.stringify(stats));
+  }
+  document.getElementById('statScanned').textContent   = stats.scanned  || 0;
+  document.getElementById('statWatchlist').textContent = watchlist.length;
+  document.getElementById('statPassed').textContent    = stats.passed   || 0;
+}
+
+function renderProfile() {
+  const name  = localStorage.getItem('profileName')  || 'Investor';
+  const email = localStorage.getItem('profileEmail') || '';
+  document.getElementById('profileName').textContent = name;
+  document.getElementById('nameInput').value         = name !== 'Investor' ? name : '';
+  document.getElementById('emailInput').value        = email;
+  document.getElementById('passInput').value         = '';
+  updateStats();
+}
+
+function saveProfile() {
+  const name  = document.getElementById('nameInput').value.trim();
+  const email = document.getElementById('emailInput').value.trim();
+  const pass  = document.getElementById('passInput').value.trim();
+  if (name)  { localStorage.setItem('profileName',  name);  document.getElementById('profileName').textContent = name; }
+  if (email) { localStorage.setItem('profileEmail', email); }
+  if (pass)  { localStorage.setItem('profilePass',  btoa(pass)); }
+  alert('Profile saved!');
+}
+
+// ── TWITTER BUTTONS ───────────────────────────────────
+function updateTwitterButtons(ticker, price, score, sentiment) {
+  const tweetText = encodeURIComponent(
+    `$${ticker} Health Check: ${score}/4 signals ✅\n` +
+    `Price: $${price} | Market: ${sentiment}\n` +
+    `Analyzed with LeapScreener 📊`
+  );
+  document.getElementById('tweetShareBtn').href  = `https://twitter.com/intent/tweet?text=${tweetText}`;
+  document.getElementById('tweetSearchBtn').href = `https://twitter.com/search?q=%24${ticker}`;
+  document.getElementById('tweetSearchBtn').innerHTML = `🔍 View $${ticker} on X`;
+  if (document.getElementById('nav-home').classList.contains('active')) {
+    document.getElementById('twitterBtns').style.display = 'flex';
+  }
 }
 
 // Enter key support
