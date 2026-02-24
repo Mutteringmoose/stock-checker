@@ -1598,11 +1598,17 @@ async function analyze() {
 
   hideError();
 
-  // Resolve company name → ticker if needed
-  const isTicker = /^[A-Za-z]{1,5}$/.test(raw);
+  // Resolve company name → ticker
+  // Real tickers are 1-4 chars (AAPL, MSFT, NVDA) or known 5-char ones (GOOGL, META was 4)
+  // If user types a word like "Apple" or "APPLE" we search FMP to resolve it
+  const upperRaw = raw.toUpperCase();
+  // Only treat as direct ticker if: all caps, max 4 chars, no spaces
+  // 5-char inputs always go through search to catch "APPLE", "TESLA", etc.
+  const isDirectTicker = /^[A-Z]{1,4}$/.test(upperRaw) && raw === raw.toUpperCase();
   let ticker;
-  if (isTicker) {
-    ticker = raw.toUpperCase();
+
+  if (isDirectTicker) {
+    ticker = upperRaw;
   } else {
     // Show searching state
     const btn = document.getElementById('analyzeBtn');
