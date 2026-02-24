@@ -10,20 +10,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
 <style>
   html, body {
-    background-color: #060a0f !important;
+    background-color: #0a0f1a !important;
   }
 
 :root {
-–bg: #060a0f;
-–surface: #0d1520;
-–border: #1a2a3a;
-–accent: #00e5ff;
-–accent2: #00ff99;
-–danger: #ff2244;
-–warn: #ffcc00;
-–text: #f0f8ff;
-–muted: #4a6080;
-–card: #0a1520;
+–bg: #0a0f1a;
+–surface: #111827;
+–border: #1e3a5f;
+–accent: #00cfff;
+–accent2: #00e676;
+–danger: #ff1744;
+–warn: #ffab00;
+–text: #e8f4fd;
+–muted: #5b8db8;
+–card: #0d1b2e;
 }
 
 - { margin: 0; padding: 0; box-sizing: border-box; }
@@ -71,8 +71,8 @@ margin-bottom: 48px;
 font-size: clamp(48px, 12vw, 80px);
 font-weight: 900;
 letter-spacing: -3px;
-color: #00e5ff;
-text-shadow: 0 0 30px rgba(0,229,255,0.6), 0 0 60px rgba(0,229,255,0.3);
+color: #00cfff;
+text-shadow: 0 0 30px rgba(0,207,255,0.7), 0 0 60px rgba(0,207,255,0.35);
 margin-bottom: 12px;
 display: block;
 visibility: visible;
@@ -228,8 +228,8 @@ gap: 12px;
 }
 
 .check-card {
-background: var(–card);
-border: 1px solid var(–border);
+background: #0d1b2e;
+border: 1px solid #1e3a5f;
 border-radius: 12px;
 padding: 20px 24px;
 display: flex;
@@ -274,14 +274,14 @@ transition: all 0.3s;
 }
 
 .check-icon.pass {
-background: rgba(0,255,136,0.2);
-box-shadow: 0 0 16px rgba(0,255,136,0.5), inset 0 0 12px rgba(0,255,136,0.15);
-border: 1px solid rgba(0,255,136,0.4);
+background: #1a4d3a;
+box-shadow: 0 0 0 2px #00e676, 0 0 20px rgba(0,230,118,0.4);
+border: 2px solid #00e676;
 }
 .check-icon.fail {
-background: rgba(255,34,68,0.2);
-box-shadow: 0 0 16px rgba(255,34,68,0.5), inset 0 0 12px rgba(255,34,68,0.15);
-border: 1px solid rgba(255,34,68,0.4);
+background: #3d1a1a;
+box-shadow: 0 0 0 2px #ff1744, 0 0 20px rgba(255,23,68,0.4);
+border: 2px solid #ff1744;
 }
 .check-icon.loading {
 background: rgba(0,212,255,0.08);
