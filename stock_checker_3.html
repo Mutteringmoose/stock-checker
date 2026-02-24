@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -16,912 +15,1151 @@
     background-color: #0a0f1a !important;
   }
 
-:root {
-–bg: #0a0f1a;
-–surface: #111827;
-–border: #1e3a5f;
-–accent: #00cfff;
-–accent2: #00e676;
-–danger: #ff1744;
-–warn: #ffab00;
-–text: #e8f4fd;
-–muted: #5b8db8;
-–card: #0d1b2e;
-}
-
-- { margin: 0; padding: 0; box-sizing: border-box; }
-
-body {
-background: var(–bg);
-color: var(–text);
-font-family: ‘Barlow’, sans-serif;
-min-height: 100vh;
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: flex-start;
-padding: 32px 20px 100px;
-overflow-x: hidden;
-}
-
-/* Grid background */
-body::before {
-content: ‘’;
-position: fixed;
-inset: 0;
-background-image:
-linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
-linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
-background-size: 40px 40px;
-pointer-events: none;
-z-index: 0;
-}
-
-.container {
-width: 100%;
-max-width: 680px;
-padding: 0 16px;
-box-sizing: border-box;
-position: relative;
-z-index: 1;
-}
-
-/* Header */
-.header {
-text-align: center;
-margin-bottom: 28px;
-padding-top: 0;
-width: 100%;
-}
-
-.header h1 {
-font-size: 64px !important;
-font-weight: 900 !important;
-letter-spacing: -2px;
-color: #00cfff !important;
-line-height: 1.05;
-margin-bottom: 0;
-display: block !important;
-visibility: visible !important;
-opacity: 1 !important;
--webkit-text-fill-color: #00cfff;
-}
-
-.header-sub {
-font-size: 17px;
-color: var(–text);
-font-weight: 500;
-margin-bottom: 4px;
-opacity: 0.9;
-}
-
-.header-sub2 {
-font-size: 14px;
-color: var(–muted);
-font-weight: 400;
-margin-bottom: 0;
-}
-
-.search-hint {
-text-align: center;
-font-size: 13px;
-color: var(–muted);
-margin-top: 10px;
-margin-bottom: 24px;
-letter-spacing: 0.3px;
-}
-
-.header .label {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 11px;
-letter-spacing: 4px;
-color: var(–accent);
-text-transform: uppercase;
-margin-bottom: 12px;
-opacity: 0.8;
-}
-
-.header h1 {
-font-size: 48px;
-font-weight: 900;
-letter-spacing: -2px;
-line-height: 1;
-background: linear-gradient(135deg, #fff 0%, var(–accent) 100%);
--webkit-background-clip: text;
--webkit-text-fill-color: transparent;
-background-clip: text;
-margin-bottom: 12px;
-}
-
-.header p {
-color: var(–muted);
-font-size: 14px;
-font-weight: 300;
-letter-spacing: 0.5px;
-}
-
-/* Search */
-.search-wrap {
-display: flex;
-flex-direction: column;
-gap: 12px;
-margin-bottom: 24px;
-width: 100%;
-}
-
-.search-wrap input {
-width: 100%;
-box-sizing: border-box;
-background: var(–surface);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 16px 20px;
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 22px;
-font-weight: 700;
-letter-spacing: 4px;
-color: var(–accent);
-text-transform: uppercase;
-outline: none;
-transition: border-color 0.2s, box-shadow 0.2s;
-}
-
-.search-wrap input::placeholder {
-color: var(–muted);
-letter-spacing: 2px;
-font-size: 16px;
-}
-
-.search-wrap input:focus {
-border-color: var(–accent);
-box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.05);
-}
-
-.search-wrap button {
-background: var(–accent);
-color: var(–bg);
-border: none;
-border-radius: 12px;
-padding: 18px 28px;
-width: 100%;
-box-sizing: border-box;
-font-family: ‘Barlow’, sans-serif;
-font-size: 16px;
-font-weight: 700;
-letter-spacing: 1.5px;
-text-transform: uppercase;
-cursor: pointer;
-transition: all 0.2s;
-white-space: nowrap;
-}
-
-.search-wrap button:hover {
-background: #33ddff;
-transform: translateY(-1px);
-box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
-}
-
-.search-wrap button:active { transform: translateY(0); }
-.search-wrap button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
-
-/* Stock info bar */
-.stock-info {
-display: flex;
-align-items: baseline;
-gap: 16px;
-margin-bottom: 24px;
-padding: 0 4px;
-opacity: 0;
-transform: translateY(10px);
-transition: all 0.4s ease;
-}
-
-.stock-info.visible {
-opacity: 1;
-transform: translateY(0);
-}
-
-.stock-name {
-font-size: 28px;
-font-weight: 900;
-letter-spacing: -0.5px;
-}
-
-.stock-price {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 22px;
-color: var(–accent);
-}
-
-.stock-change {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 14px;
-padding: 3px 10px;
-border-radius: 4px;
-}
-
-.stock-change.up { background: rgba(0,255,136,0.15); color: var(–accent2); }
-.stock-change.down { background: rgba(255,61,87,0.15); color: var(–danger); }
-
-/* Score badge */
-.score-badge {
-margin-left: auto;
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 13px;
-color: var(–muted);
-}
-
-.score-badge span {
-font-size: 20px;
-font-weight: 700;
-color: var(–text);
-}
-
-/* Cards */
-.checks {
-display: flex;
-flex-direction: column;
-gap: 12px;
-}
-
-.check-card {
-background: #0d1b2e;
-border: 1px solid #1e3a5f;
-border-radius: 12px;
-padding: 20px 24px;
-display: flex;
-align-items: center;
-gap: 20px;
-opacity: 0;
-transform: translateY(16px);
-transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s;
-position: relative;
-overflow: hidden;
-}
-
-.check-card::before {
-content: ‘’;
-position: absolute;
-left: 0; top: 0; bottom: 0;
-width: 3px;
-border-radius: 3px 0 0 3px;
-background: var(–border);
-transition: background 0.3s;
-}
-
-.check-card.visible { opacity: 1; transform: translateY(0); }
-
-.check-card.pass { border-color: rgba(0,255,136,0.2); }
-.check-card.pass::before { background: var(–accent2); }
-.check-card.fail { border-color: rgba(255,61,87,0.2); }
-.check-card.fail::before { background: var(–danger); }
-.check-card.loading { border-color: rgba(0,212,255,0.15); }
-
-/* Icon */
-.check-icon {
-width: 44px;
-height: 44px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 20px;
-flex-shrink: 0;
-transition: all 0.3s;
-}
-
-.check-icon.pass {
-background: #1a4d3a;
-box-shadow: 0 0 0 2px #00e676, 0 0 20px rgba(0,230,118,0.4);
-border: 2px solid #00e676;
-}
-.check-icon.fail {
-background: #3d1a1a;
-box-shadow: 0 0 0 2px #ff1744, 0 0 20px rgba(255,23,68,0.4);
-border: 2px solid #ff1744;
-}
-.check-icon.loading {
-background: rgba(0,212,255,0.08);
-animation: pulse 1.2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-0%, 100% { opacity: 0.4; }
-50% { opacity: 1; }
-}
-
-/* Content */
-.check-content { flex: 1; }
-
-.check-title {
-font-size: 15px;
-font-weight: 600;
-letter-spacing: 0.3px;
-margin-bottom: 4px;
-color: var(–text);
-}
-
-.check-detail {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 12px;
-color: var(–muted);
-line-height: 1.6;
-}
-
-.check-detail .val {
-color: var(–accent);
-}
-
-.check-detail .pass-val { color: var(–accent2); }
-.check-detail .fail-val { color: var(–danger); }
-
-/* Status pill */
-.check-status {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 11px;
-letter-spacing: 1px;
-padding: 5px 12px;
-border-radius: 20px;
-flex-shrink: 0;
-font-weight: 700;
-}
-
-.check-status.pass { background: rgba(0,255,136,0.12); color: var(–accent2); }
-.check-status.fail { background: rgba(255,61,87,0.12); color: var(–danger); }
-.check-status.loading { background: rgba(0,212,255,0.08); color: var(–muted); }
-
-/* Verdict */
-.verdict {
-margin-top: 24px;
-padding: 20px 24px;
-border-radius: 12px;
-border: 1px solid var(–border);
-display: flex;
-align-items: center;
-gap: 16px;
-opacity: 0;
-transform: translateY(16px);
-transition: all 0.5s ease 0.6s;
-background: var(–card);
-}
-
-.verdict.visible { opacity: 1; transform: translateY(0); }
-.verdict.bullish { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.04); }
-.verdict.bearish { border-color: rgba(255,61,87,0.3); background: rgba(255,61,87,0.04); }
-.verdict.neutral { border-color: rgba(255,184,0,0.3); background: rgba(255,184,0,0.04); }
-
-.verdict-icon { font-size: 28px; }
-
-.verdict-text .verdict-title {
-font-size: 16px;
-font-weight: 700;
-margin-bottom: 3px;
-}
-
-.verdict-text .verdict-sub {
-font-size: 13px;
-color: var(–muted);
-font-weight: 300;
-}
-
-.verdict.bullish .verdict-title { color: var(–accent2); }
-.verdict.bearish .verdict-title { color: var(–danger); }
-.verdict.neutral .verdict-title { color: var(–warn); }
-
-/* Error */
-.error-msg {
-text-align: center;
-padding: 24px;
-color: var(–danger);
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 13px;
-display: none;
-}
-
-/* Fear & Greed Widget */
-.fg-widget {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 16px;
-padding: 18px 20px;
-margin-bottom: 28px;
-display: flex;
-flex-direction: column;
-gap: 12px;
-opacity: 0;
-transform: translateY(10px);
-transition: all 0.4s ease;
-width: 100%;
-box-sizing: border-box;
-}
-
-.fg-top-row {
-display: flex;
-justify-content: space-between;
-align-items: center;
-}
-
-.fg-title {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 11px;
-letter-spacing: 2px;
-color: var(–muted);
-text-transform: uppercase;
-}
-
-.fg-widget.loaded { opacity: 1; transform: translateY(0); }
-
-.fg-label {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 8px;
-letter-spacing: 1.5px;
-color: var(–muted);
-text-transform: uppercase;
-flex-shrink: 0;
-writing-mode: vertical-rl;
-text-orientation: mixed;
-transform: rotate(180deg);
-line-height: 1.3;
-max-height: 80px;
-}
-
-.fg-bar-wrap {
-width: 100%;
-height: 14px;
-background: rgba(255,255,255,0.08);
-border-radius: 10px;
-overflow: visible;
-position: relative;
-}
-
-.fg-bar {
-height: 100%;
-border-radius: 8px;
-transition: width 1s ease;
-background: linear-gradient(90deg, #ff1744 0%, #ff6d00 25%, #ffab00 50%, #00e676 75%, #00cfff 100%);
-width: 100% !important;
-opacity: 0.95;
-}
-
-.fg-needle {
-position: absolute;
-top: -5px;
-width: 4px;
-height: 22px;
-background: white;
-border-radius: 3px;
-transform: translateX(-50%);
-transition: left 1s ease;
-box-shadow: 0 0 8px rgba(255,255,255,0.9);
-}
-
-.fg-axis-labels {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-top: 2px;
-}
-
-.fg-axis-left {
-font-size: 11px;
-color: #ff1744;
-font-weight: 700;
-letter-spacing: 0.3px;
-}
-
-.fg-axis-right {
-font-size: 11px;
-color: #00cfff;
-font-weight: 700;
-letter-spacing: 0.3px;
-}
-
-.fg-right {
-display: flex;
-flex-direction: row;
-align-items: center;
-gap: 8px;
-flex-shrink: 0;
-}
-
-.fg-score {
-font-family: ‘Share Tech Mono’, monospace;
-font-size: 26px;
-font-weight: 700;
-line-height: 1;
-}
-
-.fg-sentiment {
-font-size: 11px;
-font-weight: 600;
-letter-spacing: 1px;
-text-transform: uppercase;
-padding: 4px 10px;
-border-radius: 20px;
-white-space: nowrap;
-}
-
-.fg-sentiment.extreme-fear  { background: rgba(255,61,87,0.15);   color: #ff3d57; }
-.fg-sentiment.fear          { background: rgba(255,140,0,0.15);   color: #ff8c00; }
-.fg-sentiment.neutral       { background: rgba(255,184,0,0.15);   color: #ffb800; }
-.fg-sentiment.greed         { background: rgba(100,220,100,0.15); color: #64dc64; }
-.fg-sentiment.extreme-greed { background: rgba(0,255,136,0.15);   color: #00ff88; }
-
-/* Twitter Buttons */
-.twitter-btns {
-display: flex !important;
-gap: 10px;
-margin-top: 16px;
-justify-content: center;
-flex-wrap: wrap;
-}
-
-.tw-btn {
-display: inline-flex;
-align-items: center;
-gap: 8px;
-padding: 12px 20px;
-border-radius: 8px;
-font-size: 13px;
-font-weight: 600;
-letter-spacing: 0.5px;
-text-decoration: none;
-transition: all 0.2s;
-border: 1px solid var(–border);
-}
-
-.tw-share {
-background: rgba(29,161,242,0.12);
-color: #1da1f2;
-border-color: rgba(29,161,242,0.3);
-}
-
-.tw-search {
-background: rgba(0,212,255,0.08);
-color: var(–accent);
-border-color: rgba(0,212,255,0.2);
-}
-
-.tw-btn:hover { transform: translateY(-2px); opacity: 0.85; }
-
-/* Bottom Nav */
-.bottom-nav {
-position: fixed;
-bottom: 0; left: 0; right: 0;
-background: rgba(6,10,15,0.95);
-backdrop-filter: blur(12px);
-border-top: 1px solid var(–border);
-display: flex;
-justify-content: space-around;
-padding: 8px 0 12px;
-z-index: 100;
-}
-
-.nav-btn {
-background: none;
-border: none;
-cursor: pointer;
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 4px;
-padding: 6px 24px;
-border-radius: 8px;
-transition: all 0.2s;
-color: var(–muted);
-}
-
-.nav-btn.active { color: var(–accent); }
-.nav-btn:hover  { color: var(–text); }
-
-.nav-icon  { font-size: 20px; }
-.nav-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
-
-/* Tab panels */
-.tab-panel { padding-bottom: 80px; }
-
-.tab-title {
-font-size: 24px;
-font-weight: 900;
-letter-spacing: -0.5px;
-margin-bottom: 24px;
-color: var(–text);
-}
-
-/* Watchlist */
-.watchlist-empty { text-align: center; padding: 60px 20px; color: var(–muted); }
-
-.watchlist-item {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 12px;
-padding: 16px 20px;
-margin-bottom: 10px;
-display: flex;
-align-items: center;
-justify-content: space-between;
-cursor: pointer;
-transition: border-color 0.2s;
-}
-
-.watchlist-item:hover { border-color: var(–accent); }
-
-.wl-left { display: flex; align-items: center; gap: 14px; }
-.wl-ticker { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
-.wl-price  { font-family: ‘Share Tech Mono’, monospace; font-size: 14px; color: var(–accent); }
-.wl-score  { font-family: ‘Share Tech Mono’, monospace; font-size: 12px; padding: 3px 10px; border-radius: 20px; }
-.wl-score.high { background: rgba(0,255,136,0.12); color: var(–accent2); }
-.wl-score.mid  { background: rgba(255,184,0,0.12);  color: var(–warn); }
-.wl-score.low  { background: rgba(255,61,87,0.12);  color: var(–danger); }
-.wl-remove { background: none; border: none; cursor: pointer; color: var(–muted); font-size: 16px; padding: 4px; }
-.wl-remove:hover { color: var(–danger); }
-.wl-bell { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.5; transition: opacity 0.2s; }
-.wl-bell:hover { opacity: 1; }
-.wl-bell.bell-on { opacity: 1; }
-.profile-fields { display: flex; flex-direction: column; gap: 14px; }
-.profile-field-group { display: flex; flex-direction: column; gap: 6px; }
-.field-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(–muted); font-family: ‘Share Tech Mono’, monospace; }
-.field-note  { font-size: 11px; color: var(–warn); margin-top: 4px; }
-
-.add-watchlist-btn {
-width: 100%;
-margin-top: 16px;
-padding: 12px;
-background: rgba(0,212,255,0.08);
-border: 1px solid rgba(0,212,255,0.2);
-border-radius: 8px;
-color: var(–accent);
-font-size: 13px;
-font-weight: 600;
-cursor: pointer;
-letter-spacing: 0.5px;
-transition: all 0.2s;
-display: none;
-}
-
-.add-watchlist-btn:hover { background: rgba(0,212,255,0.15); }
-
-/* Profile */
-.profile-card {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 16px;
-padding: 32px;
-text-align: center;
-margin-bottom: 20px;
-}
-
-.profile-avatar { font-size: 48px; margin-bottom: 12px; }
-.profile-name   { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
-.profile-sub    { font-size: 12px; color: var(–muted); letter-spacing: 1px; margin-top: 4px; font-family: ‘Share Tech Mono’, monospace; }
-
-.profile-stats {
-display: grid;
-grid-template-columns: repeat(3, 1fr);
-gap: 12px;
-margin-bottom: 20px;
-}
-
-.stat-box {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 12px;
-padding: 20px 12px;
-text-align: center;
-}
-
-.stat-val { font-size: 28px; font-weight: 900; color: var(–accent); font-family: ‘Share Tech Mono’, monospace; }
-.stat-lbl { font-size: 10px; color: var(–muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
-
-.profile-edit { display: flex; gap: 10px; }
-
-.name-input {
-flex: 1;
-background: var(–surface);
-border: 1px solid var(–border);
-border-radius: 8px;
-padding: 12px 16px;
-color: var(–text);
-font-size: 14px;
-outline: none;
-}
-
-.name-input:focus { border-color: var(–accent); }
-
-.save-btn {
-background: var(–accent);
-color: var(–bg);
-border: none;
-border-radius: 8px;
-padding: 12px 20px;
-font-weight: 700;
-font-size: 13px;
-cursor: pointer;
-transition: all 0.2s;
-}
-
-.save-btn:hover { opacity: 0.85; }
-
-body { padding-bottom: 80px; }
-
-/* Alert Badge */
-.alert-badge {
-font-size: 10px;
-font-family: ‘Share Tech Mono’, monospace;
-color: var(–accent);
-background: rgba(0,212,255,0.12);
-border: 1px solid rgba(0,212,255,0.25);
-border-radius: 10px;
-padding: 2px 7px;
-font-weight: 700;
-flex-shrink: 0;
-}
-
-/* Modal */
-.modal-overlay {
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.75);
-backdrop-filter: blur(4px);
-z-index: 200;
-display: flex;
-align-items: center;
-justify-content: center;
-padding: 20px;
-}
-
-.modal-box {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 16px;
-padding: 28px 24px;
-width: 100%;
-max-width: 360px;
-text-align: center;
-}
-
-.modal-title {
-font-size: 18px;
-font-weight: 800;
-margin-bottom: 8px;
-letter-spacing: -0.3px;
-}
-
-.modal-sub {
-font-size: 13px;
-color: var(–muted);
-margin-bottom: 20px;
-line-height: 1.5;
-}
-
-.alert-options {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 12px;
-margin-bottom: 14px;
-}
-
-.alert-option {
-background: var(–surface);
-border: 2px solid var(–border);
-border-radius: 12px;
-padding: 16px 12px;
-cursor: pointer;
-display: flex;
-flex-direction: column;
-align-items: center;
-gap: 6px;
-transition: all 0.2s;
-color: var(–text);
-}
-
-.alert-option:hover, .alert-option.selected {
-border-color: var(–accent);
-background: rgba(0,212,255,0.08);
-}
-
-.alert-opt-score {
-font-size: 24px;
-font-weight: 900;
-font-family: ‘Share Tech Mono’, monospace;
-color: var(–accent);
-}
-
-.alert-opt-label {
-font-size: 11px;
-letter-spacing: 1px;
-text-transform: uppercase;
-color: var(–muted);
-}
-
-.alert-off-btn {
-width: 100%;
-padding: 10px;
-background: rgba(255,61,87,0.08);
-border: 1px solid rgba(255,61,87,0.2);
-border-radius: 8px;
-color: #ff3d57;
-font-size: 13px;
-font-weight: 600;
-cursor: pointer;
-margin-bottom: 10px;
-transition: all 0.2s;
-}
-
-.alert-off-btn:hover { background: rgba(255,61,87,0.15); }
-
-.modal-close {
-width: 100%;
-padding: 10px;
-background: none;
-border: 1px solid var(–border);
-border-radius: 8px;
-color: var(–muted);
-font-size: 13px;
-cursor: pointer;
-margin-bottom: 12px;
-transition: all 0.2s;
-}
-
-.modal-close:hover { color: var(–text); border-color: var(–text); }
-
-.modal-note {
-font-size: 11px;
-color: var(–warn);
-line-height: 1.4;
-}
-
-/* Toast */
-#toast {
-position: fixed;
-bottom: 90px;
-left: 50%;
-transform: translateX(-50%) translateY(20px);
-background: var(–card);
-border: 1px solid var(–accent);
-color: var(–text);
-padding: 12px 20px;
-border-radius: 30px;
-font-size: 13px;
-font-weight: 600;
-opacity: 0;
-transition: all 0.3s ease;
-white-space: nowrap;
-z-index: 300;
-pointer-events: none;
-}
-
-#toast.show {
-opacity: 1;
-transform: translateX(-50%) translateY(0);
-}
-
-/* Footer */
-.footer {
-margin-top: 40px;
-text-align: center;
-font-size: 11px;
-color: var(–muted);
-letter-spacing: 0.5px;
-font-family: ‘Share Tech Mono’, monospace;
-}
-
-/* Spinner in button */
-.spinner {
-display: inline-block;
-width: 14px;
-height: 14px;
-border: 2px solid rgba(6,10,15,0.3);
-border-top-color: var(–bg);
-border-radius: 50%;
-animation: spin 0.7s linear infinite;
-vertical-align: middle;
-margin-right: 6px;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
+  :root {
+    --bg: #0a0f1a;
+    --surface: #111827;
+    --border: #1e3a5f;
+    --accent: #00cfff;
+    --accent2: #00e676;
+    --danger: #ff1744;
+    --warn: #ffab00;
+    --text: #e8f4fd;
+    --muted: #5b8db8;
+    --card: #0d1b2e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 32px 20px 100px;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 680px;
+    padding: 0 16px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding-top: 0;
+    width: 100%;
+  }
+
+  .header h1 {
+    font-size: 64px !important;
+    font-weight: 900 !important;
+    letter-spacing: -2px;
+    color: #00cfff !important;
+    line-height: 1.05;
+    margin-bottom: 0;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    -webkit-text-fill-color: #00cfff;
+  }
+
+  .header-sub {
+    font-size: 17px;
+    color: var(--text);
+    font-weight: 500;
+    margin-bottom: 4px;
+    opacity: 0.9;
+  }
+
+  .header-sub2 {
+    font-size: 14px;
+    color: var(--muted);
+    font-weight: 400;
+    margin-bottom: 0;
+  }
+
+  .search-hint {
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 10px;
+    margin-bottom: 24px;
+    letter-spacing: 0.3px;
+  }
+
+  .header .label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    opacity: 0.8;
+  }
+
+  .header h1 {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    line-height: 1;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+
+  .header p {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 300;
+    letter-spacing: 0.5px;
+  }
+
+  /* Search */
+  .search-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+    width: 100%;
+  }
+
+  .search-wrap input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .search-wrap input::placeholder {
+    color: var(--muted);
+    letter-spacing: 2px;
+    font-size: 16px;
+  }
+
+  .search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1), 0 0 20px rgba(0, 212, 255, 0.05);
+  }
+
+  .search-wrap button {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 12px;
+    padding: 18px 28px;
+    width: 100%;
+    box-sizing: border-box;
+    font-family: 'Barlow', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .search-wrap button:hover {
+    background: #33ddff;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(0, 212, 255, 0.3);
+  }
+
+  .search-wrap button:active { transform: translateY(0); }
+  .search-wrap button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  /* Stock info bar */
+  .stock-info {
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    margin-bottom: 24px;
+    padding: 0 4px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+  }
+
+  .stock-info.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .stock-name {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+  }
+
+  .stock-price {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 22px;
+    color: var(--accent);
+  }
+
+  .stock-change {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 14px;
+    padding: 3px 10px;
+    border-radius: 4px;
+  }
+
+  .stock-change.up { background: rgba(0,255,136,0.15); color: var(--accent2); }
+  .stock-change.down { background: rgba(255,61,87,0.15); color: var(--danger); }
+
+  /* Score badge */
+  .score-badge {
+    margin-left: auto;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .score-badge span {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* Cards */
+  .checks {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .check-card {
+    background: #0d1b2e;
+    border: 1px solid #1e3a5f;
+    border-radius: 12px;
+    padding: 20px 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.4s ease, transform 0.4s ease, border-color 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .check-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+    background: var(--border);
+    transition: background 0.3s;
+  }
+
+  .check-card.visible { opacity: 1; transform: translateY(0); }
+
+  .check-card.pass { border-color: rgba(0,255,136,0.2); }
+  .check-card.pass::before { background: var(--accent2); }
+  .check-card.fail { border-color: rgba(255,61,87,0.2); }
+  .check-card.fail::before { background: var(--danger); }
+  .check-card.loading { border-color: rgba(0,212,255,0.15); }
+
+  /* Icon */
+  .check-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .check-icon.pass { 
+    background: #1a4d3a;
+    box-shadow: 0 0 0 2px #00e676, 0 0 20px rgba(0,230,118,0.4);
+    border: 2px solid #00e676;
+  }
+  .check-icon.fail { 
+    background: #3d1a1a;
+    box-shadow: 0 0 0 2px #ff1744, 0 0 20px rgba(255,23,68,0.4);
+    border: 2px solid #ff1744;
+  }
+  .check-icon.loading {
+    background: rgba(0,212,255,0.08);
+    animation: pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 1; }
+  }
+
+  /* Content */
+  .check-content { flex: 1; }
+
+  .check-title {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    margin-bottom: 4px;
+    color: var(--text);
+  }
+
+  .check-detail {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .check-detail .val {
+    color: var(--accent);
+  }
+
+  .check-detail .pass-val { color: var(--accent2); }
+  .check-detail .fail-val { color: var(--danger); }
+
+  /* Status pill */
+  .check-status {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    padding: 5px 12px;
+    border-radius: 20px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+
+  .check-status.pass { background: rgba(0,255,136,0.12); color: var(--accent2); }
+  .check-status.fail { background: rgba(255,61,87,0.12); color: var(--danger); }
+  .check-status.loading { background: rgba(0,212,255,0.08); color: var(--muted); }
+
+  /* Verdict */
+  .verdict {
+    margin-top: 24px;
+    padding: 20px 24px;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    opacity: 0;
+    transform: translateY(16px);
+    transition: all 0.5s ease 0.6s;
+    background: var(--card);
+  }
+
+  .verdict.visible { opacity: 1; transform: translateY(0); }
+  .verdict.bullish { border-color: rgba(0,255,136,0.3); background: rgba(0,255,136,0.04); }
+  .verdict.bearish { border-color: rgba(255,61,87,0.3); background: rgba(255,61,87,0.04); }
+  .verdict.neutral { border-color: rgba(255,184,0,0.3); background: rgba(255,184,0,0.04); }
+
+  .verdict-icon { font-size: 28px; }
+
+  .verdict-text .verdict-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 3px;
+  }
+
+  .verdict-text .verdict-sub {
+    font-size: 13px;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .verdict.bullish .verdict-title { color: var(--accent2); }
+  .verdict.bearish .verdict-title { color: var(--danger); }
+  .verdict.neutral .verdict-title { color: var(--warn); }
+
+  /* Error */
+  .error-msg {
+    text-align: center;
+    padding: 24px;
+    color: var(--danger);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    display: none;
+  }
+
+  /* Fear & Greed Widget */
+  .fg-widget {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.4s ease;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .fg-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .fg-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .fg-widget.loaded { opacity: 1; transform: translateY(0); }
+
+  .fg-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 8px;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    text-transform: uppercase;
+    flex-shrink: 0;
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    transform: rotate(180deg);
+    line-height: 1.3;
+    max-height: 80px;
+  }
+
+
+
+  .fg-bar-wrap {
+    width: 100%;
+    height: 14px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    overflow: visible;
+    position: relative;
+  }
+
+  .fg-bar {
+    height: 100%;
+    border-radius: 8px;
+    transition: width 1s ease;
+    background: linear-gradient(90deg, #ff1744 0%, #ff6d00 25%, #ffab00 50%, #00e676 75%, #00cfff 100%);
+    width: 100% !important;
+    opacity: 0.95;
+  }
+
+  .fg-needle {
+    position: absolute;
+    top: -5px;
+    width: 4px;
+    height: 22px;
+    background: white;
+    border-radius: 3px;
+    transform: translateX(-50%);
+    transition: left 1s ease;
+    box-shadow: 0 0 8px rgba(255,255,255,0.9);
+  }
+
+  .fg-axis-labels {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2px;
+  }
+
+  .fg-axis-left {
+    font-size: 11px;
+    color: #ff1744;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .fg-axis-right {
+    font-size: 11px;
+    color: #00cfff;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+  }
+
+  .fg-right {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .fg-score {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 26px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .fg-sentiment {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    white-space: nowrap;
+  }
+
+  .fg-sentiment.extreme-fear  { background: rgba(255,61,87,0.15);   color: #ff3d57; }
+  .fg-sentiment.fear          { background: rgba(255,140,0,0.15);   color: #ff8c00; }
+  .fg-sentiment.neutral       { background: rgba(255,184,0,0.15);   color: #ffb800; }
+  .fg-sentiment.greed         { background: rgba(100,220,100,0.15); color: #64dc64; }
+  .fg-sentiment.extreme-greed { background: rgba(0,255,136,0.15);   color: #00ff88; }
+
+  /* Twitter Buttons */
+  .twitter-btns {
+    display: flex !important;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .tw-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid var(--border);
+  }
+
+  .tw-share {
+    background: rgba(29,161,242,0.12);
+    color: #1da1f2;
+    border-color: rgba(29,161,242,0.3);
+  }
+
+  .tw-search {
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    border-color: rgba(0,212,255,0.2);
+  }
+
+  .tw-btn:hover { transform: translateY(-2px); opacity: 0.85; }
+
+  /* Bottom Nav */
+  .bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(6,10,15,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    z-index: 100;
+  }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 24px;
+    border-radius: 8px;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+
+  .nav-btn.active { color: var(--accent); }
+  .nav-btn:hover  { color: var(--text); }
+
+  .nav-icon  { font-size: 20px; }
+  .nav-label { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; font-weight: 600; }
+
+  /* Tab panels */
+  .tab-panel { padding-bottom: 80px; }
+
+  .tab-title {
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    margin-bottom: 24px;
+    color: var(--text);
+  }
+
+  /* Watchlist */
+  .watchlist-empty { text-align: center; padding: 60px 20px; color: var(--muted); }
+
+  .watchlist-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .watchlist-item:hover { border-color: var(--accent); }
+
+  .wl-left { display: flex; align-items: center; gap: 14px; }
+  .wl-ticker { font-size: 18px; font-weight: 900; letter-spacing: -0.5px; }
+  .wl-price  { font-family: 'Share Tech Mono', monospace; font-size: 14px; color: var(--accent); }
+  .wl-score  { font-family: 'Share Tech Mono', monospace; font-size: 12px; padding: 3px 10px; border-radius: 20px; }
+  .wl-score.high { background: rgba(0,255,136,0.12); color: var(--accent2); }
+  .wl-score.mid  { background: rgba(255,184,0,0.12);  color: var(--warn); }
+  .wl-score.low  { background: rgba(255,61,87,0.12);  color: var(--danger); }
+  .wl-remove { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 4px; }
+  .wl-remove:hover { color: var(--danger); }
+  .wl-bell { background: none; border: none; cursor: pointer; font-size: 16px; padding: 4px; opacity: 0.5; transition: opacity 0.2s; }
+  .wl-bell:hover { opacity: 1; }
+  .wl-bell.bell-on { opacity: 1; }
+  .profile-fields { display: flex; flex-direction: column; gap: 14px; }
+  .profile-field-group { display: flex; flex-direction: column; gap: 6px; }
+  .field-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); font-family: 'Share Tech Mono', monospace; }
+  .field-note  { font-size: 11px; color: var(--warn); margin-top: 4px; }
+
+  .add-watchlist-btn {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0,212,255,0.08);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.2s;
+    display: none;
+  }
+
+  .add-watchlist-btn:hover { background: rgba(0,212,255,0.15); }
+
+  /* Profile */
+  .profile-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  .profile-avatar { font-size: 48px; margin-bottom: 12px; }
+  .profile-name   { font-size: 22px; font-weight: 900; letter-spacing: -0.5px; }
+  .profile-sub    { font-size: 12px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; font-family: 'Share Tech Mono', monospace; }
+
+  .profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px 12px;
+    text-align: center;
+  }
+
+  .stat-val { font-size: 28px; font-weight: 900; color: var(--accent); font-family: 'Share Tech Mono', monospace; }
+  .stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+  .profile-edit { display: flex; gap: 10px; }
+
+  .name-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .name-input:focus { border-color: var(--accent); }
+
+  .save-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .save-btn:hover { opacity: 0.85; }
+
+  body { padding-bottom: 80px; }
+
+  /* Alert Badge */
+  .alert-badge {
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+    background: rgba(0,212,255,0.12);
+    border: 1px solid rgba(0,212,255,0.25);
+    border-radius: 10px;
+    padding: 2px 7px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px 24px;
+    width: 100%;
+    max-width: 360px;
+    text-align: center;
+  }
+
+  .modal-title {
+    font-size: 18px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.3px;
+  }
+
+  .modal-sub {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+
+  .alert-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .alert-option {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s;
+    color: var(--text);
+  }
+
+  .alert-option:hover, .alert-option.selected {
+    border-color: var(--accent);
+    background: rgba(0,212,255,0.08);
+  }
+
+  .alert-opt-score {
+    font-size: 24px;
+    font-weight: 900;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+  }
+
+  .alert-opt-label {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .alert-off-btn {
+    width: 100%;
+    padding: 10px;
+    background: rgba(255,61,87,0.08);
+    border: 1px solid rgba(255,61,87,0.2);
+    border-radius: 8px;
+    color: #ff3d57;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.2s;
+  }
+
+  .alert-off-btn:hover { background: rgba(255,61,87,0.15); }
+
+  .modal-close {
+    width: 100%;
+    padding: 10px;
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 13px;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: all 0.2s;
+  }
+
+  .modal-close:hover { color: var(--text); border-color: var(--text); }
+
+  .modal-note {
+    font-size: 11px;
+    color: var(--warn);
+    line-height: 1.4;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--card);
+    border: 1px solid var(--accent);
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 30px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    z-index: 300;
+    pointer-events: none;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* Footer */
+  .footer {
+    margin-top: 40px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  /* Spinner in button */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(6,10,15,0.3);
+    border-top-color: var(--bg);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Options Chain Tab ─────────────────────────────── */
+  .tab-subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: -8px;
+    margin-bottom: 20px;
+  }
+
+  .opt-search-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 20px;
+    width: 100%;
+  }
+
+  .opt-search-wrap input {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .opt-search-wrap input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(0,207,255,0.1);
+  }
+
+  .opt-exp-wrap {
+    margin-bottom: 16px;
+  }
+
+  .opt-select {
+    width: 100%;
+    box-sizing: border-box;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Share Tech Mono', monospace;
+    outline: none;
+    margin-top: 6px;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235b8db8' stroke-width='2' fill='none'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+  }
+
+  .opt-toggle-wrap {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .opt-toggle {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: 'Barlow', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .opt-toggle.active {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+    box-shadow: 0 0 16px rgba(0,207,255,0.3);
+  }
+
+  .opt-price-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    font-size: 14px;
+    flex-wrap: wrap;
+  }
+
+  .opt-price-val {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent2);
+    flex: 1;
+  }
+
+  .opt-itm-key {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .itm-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    background: rgba(0,230,118,0.25);
+    border: 1px solid #00e676;
+    display: inline-block;
+  }
+
+  .otm-dot {
+    width: 10px; height: 10px;
+    border-radius: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    display: inline-block;
+  }
+
+  .opt-table-wrap {
+    width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .opt-table-scroll {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .opt-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    min-width: 520px;
+  }
+
+  .opt-table thead th {
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 10px 10px;
+    text-align: right;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .opt-table thead th:first-child { text-align: left; }
+
+  .opt-table tbody tr {
+    border-bottom: 1px solid rgba(30,58,95,0.5);
+    transition: background 0.15s;
+  }
+
+  .opt-table tbody tr:hover { background: rgba(0,207,255,0.04); }
+  .opt-table tbody tr:last-child { border-bottom: none; }
+
+  .opt-table tbody td {
+    padding: 10px 10px;
+    text-align: right;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .opt-table tbody td:first-child { text-align: left; font-weight: 700; }
+
+  /* ITM row highlight */
+  .opt-table tbody tr.itm-row {
+    background: rgba(0,230,118,0.07);
+  }
+  .opt-table tbody tr.itm-row td:first-child {
+    color: #00e676;
+  }
+
+  /* Strike cell */
+  .strike-cell {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .itm-badge {
+    font-size: 9px;
+    background: rgba(0,230,118,0.2);
+    color: #00e676;
+    border: 1px solid #00e676;
+    border-radius: 3px;
+    padding: 1px 4px;
+    letter-spacing: 0.5px;
+  }
+
+  /* Greeks colors */
+  .delta-high { color: #00e676; }
+  .delta-mid  { color: var(--warn); }
+  .delta-low  { color: var(--muted); }
+  .theta-val  { color: #ff6b6b; }
+  .iv-val     { color: var(--warn); }
+
+  /* Loading spinner */
+  .opt-loading {
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .opt-spinner {
+    width: 36px; height: 36px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* 4-tab nav — shrink padding */
+  .bottom-nav .nav-btn { padding: 6px 14px; }
+
 </style>
-
 </head>
 <body>
 
@@ -932,9 +1170,7 @@ margin-right: 6px;
   </div>
 
   <!-- Fear & Greed Widget -->
-
   <!-- Scanner Page Wrapper -->
-
   <div id="scannerPage">
   <div class="fg-widget" id="fgWidget">
     <div class="fg-top-row">
@@ -978,15 +1214,14 @@ margin-right: 6px;
   </div>
 
   <!-- Twitter Buttons -->
-
   <div class="twitter-btns" id="twitterBtns" style="display:none; margin-top:16px; gap:10px; display:none; flex-direction:row; justify-content:center;">
     <a id="tweetShareBtn" href="#" target="_blank" class="tw-btn tw-share">🐦 Tweet This Analysis</a>
     <a id="tweetSearchBtn" href="#" target="_blank" class="tw-btn tw-search">🔍 View $TICKER on X</a>
   </div>
   </div> <!-- end scannerPage -->
 
-  <!-- Alert Threshold Modal -->
 
+  <!-- Alert Threshold Modal -->
   <div id="alertModal" style="display:none;" class="modal-overlay" onclick="if(event.target===this)closeAlertModal()">
     <div class="modal-box">
       <div class="modal-title">Set Alert for <span id="alertModalTicker" style="color:var(--accent)"></span></div>
@@ -1008,7 +1243,6 @@ margin-right: 6px;
   </div>
 
   <!-- Bottom Nav -->
-
   <nav class="bottom-nav">
     <button class="nav-btn active" onclick="showTab('home')" id="nav-home">
       <span class="nav-icon">📊</span>
@@ -1022,10 +1256,13 @@ margin-right: 6px;
       <span class="nav-icon">👤</span>
       <span class="nav-label">Profile</span>
     </button>
+    <button class="nav-btn" onclick="showTab('options')" id="nav-options">
+      <span class="nav-icon">🔗</span>
+      <span class="nav-label">Options</span>
+    </button>
   </nav>
 
   <!-- Watchlist Tab -->
-
   <div class="tab-panel" id="tab-watchlist" style="display:none;">
     <h2 class="tab-title">Watchlist</h2>
     <div class="watchlist-empty" id="watchlistEmpty">
@@ -1038,7 +1275,6 @@ margin-right: 6px;
   </div>
 
   <!-- Profile Tab -->
-
   <div class="tab-panel" id="tab-profile" style="display:none;">
     <h2 class="tab-title">Profile</h2>
     <div class="profile-card">
@@ -1078,6 +1314,57 @@ margin-right: 6px;
     </div>
     <div class="footer" style="margin-top:32px;">Data via Yahoo Finance · FMP · CNN · For educational purposes only · Not financial advice</div>
   </div>
+
+  <!-- Options Chain Tab -->
+  <div class="tab-panel" id="tab-options" style="display:none;">
+    <h2 class="tab-title">Options Chain</h2>
+    <p class="tab-subtitle">View calls &amp; puts with Greeks for any ticker</p>
+
+    <div class="opt-search-wrap">
+      <input type="text" id="optTickerInput" placeholder="AAPL, MSFT, NVDA..." maxlength="10" oninput="this.value=this.value.toUpperCase()"/>
+      <button onclick="loadOptionsChain()" class="save-btn" style="margin-top:10px;width:100%;">Load Chain</button>
+    </div>
+
+    <div class="opt-exp-wrap" id="optExpWrap" style="display:none;">
+      <label class="field-label">Expiration Date</label>
+      <select id="optExpSelect" onchange="loadStrikesByExp()" class="opt-select"></select>
+    </div>
+
+    <div class="opt-toggle-wrap" id="optToggleWrap" style="display:none;">
+      <button class="opt-toggle active" id="toggleCalls" onclick="switchSide('calls')">Calls</button>
+      <button class="opt-toggle" id="togglePuts" onclick="switchSide('puts')">Puts</button>
+    </div>
+
+    <div class="opt-price-bar" id="optPriceBar" style="display:none;">
+      <span id="optStockLabel" style="font-weight:700;font-size:15px;"></span>
+      <span class="opt-price-val" id="optStockPrice"></span>
+      <span class="opt-itm-key"><span class="itm-dot"></span> ITM</span>
+      <span class="opt-itm-key"><span class="otm-dot"></span> OTM</span>
+    </div>
+
+    <div class="opt-table-wrap" id="optTableWrap" style="display:none;">
+      <div class="opt-table-scroll">
+        <table class="opt-table" id="optTable">
+          <thead>
+            <tr>
+              <th>Strike</th><th>Last</th><th>Bid</th><th>Ask</th>
+              <th>Vol</th><th>OI</th><th>IV %</th><th>Delta</th><th>Theta</th>
+            </tr>
+          </thead>
+          <tbody id="optTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="opt-loading" id="optLoading" style="display:none;">
+      <div class="opt-spinner"></div>
+      <p style="color:var(--muted);margin-top:12px;">Fetching options data...</p>
+    </div>
+    <div id="optError" style="display:none;color:var(--danger);padding:16px;text-align:center;font-size:14px;"></div>
+
+    <div class="footer" style="margin-top:32px;">Options data via Tradier · Delayed 15 min · Not financial advice</div>
+  </div>
+
 </div>
 
 <script>
@@ -1182,7 +1469,8 @@ async function loadFearGreed() {
 
 // Load fear & greed on page load
 window.addEventListener('load', loadFearGreed);
-const FMP_KEY = 'mDVQDxm4cPbho1wvfMbTgEF4jcJEsLxj'; // <-- PASTE YOUR FMP API KEY HERE
+const FMP_KEY     = 'mDVQDxm4cPbho1wvfMbTgEF4jcJEsLxj'; // <-- PASTE YOUR FMP API KEY HERE
+const TRADIER_KEY = 'GeYR0e9BgC2ODN2LFZBvscfFMh70';          // <-- PASTE YOUR TRADIER API KEY HERE
 
 async function fetchYahoo(ticker) {
   const url = PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1d&range=1y`);
@@ -1484,6 +1772,7 @@ function showTab(tab) {
   // Tab panels
   document.getElementById('tab-watchlist').style.display = tab === 'watchlist' ? '' : 'none';
   document.getElementById('tab-profile').style.display   = tab === 'profile'   ? '' : 'none';
+  document.getElementById('tab-options').style.display   = tab === 'options'   ? '' : 'none';
 
   if (tab === 'watchlist') renderWatchlist();
   if (tab === 'profile')   renderProfile();
@@ -1651,7 +1940,205 @@ function updateTwitterButtons(ticker, price, score, sentiment) {
 document.getElementById('tickerInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') analyze();
 });
-</script>
 
+
+/* ── OPTIONS CHAIN ─────────────────────────────────── */
+
+let optCurrentTicker = '';
+let optCurrentSide   = 'calls';
+let optChainData     = {};  // { expDate: { calls: [...], puts: [...] } }
+let optStockPrice    = 0;
+
+async function loadOptionsChain() {
+  const ticker = document.getElementById('optTickerInput').value.trim().toUpperCase();
+  if (!ticker) return;
+
+  optCurrentTicker = ticker;
+  optChainData = {};
+
+  // Reset UI
+  setOptLoading(true);
+  setOptError('');
+  document.getElementById('optExpWrap').style.display    = 'none';
+  document.getElementById('optToggleWrap').style.display = 'none';
+  document.getElementById('optPriceBar').style.display   = 'none';
+  document.getElementById('optTableWrap').style.display  = 'none';
+
+  try {
+    // 1. Get current stock quote
+    const quoteRes = await fetch(
+      `https://api.tradier.com/v1/markets/quotes?symbols=${ticker}&greeks=false`,
+      { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
+    );
+    const quoteJson = await quoteRes.json();
+    const quote = quoteJson?.quotes?.quote;
+    optStockPrice = parseFloat(quote?.last || quote?.close || 0);
+
+    // 2. Get expirations
+    const expRes = await fetch(
+      `https://api.tradier.com/v1/markets/options/expirations?symbol=${ticker}&includeAllRoots=false`,
+      { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
+    );
+    const expJson = await expRes.json();
+    const expirations = expJson?.expirations?.date;
+
+    if (!expirations || expirations.length === 0) {
+      throw new Error(`No options found for ${ticker}`);
+    }
+
+    const expList = Array.isArray(expirations) ? expirations : [expirations];
+
+    // Populate expiration selector
+    const sel = document.getElementById('optExpSelect');
+    sel.innerHTML = '';
+    expList.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d;
+      opt.textContent = formatExpDate(d);
+      sel.appendChild(opt);
+    });
+
+    // Update price bar
+    document.getElementById('optStockLabel').textContent = ticker;
+    document.getElementById('optStockPrice').textContent = optStockPrice ? `$${optStockPrice.toFixed(2)}` : '';
+
+    setOptLoading(false);
+    document.getElementById('optExpWrap').style.display    = '';
+    document.getElementById('optToggleWrap').style.display = '';
+    document.getElementById('optPriceBar').style.display   = '';
+
+    // Auto-load first expiration
+    await loadStrikesByExp();
+
+  } catch(e) {
+    setOptLoading(false);
+    setOptError(e.message || 'Failed to fetch options. Check your Tradier API key.');
+  }
+}
+
+async function loadStrikesByExp() {
+  const expDate = document.getElementById('optExpSelect').value;
+  if (!expDate || !optCurrentTicker) return;
+
+  // Check cache
+  if (optChainData[expDate]) {
+    renderChain(optChainData[expDate]);
+    return;
+  }
+
+  setOptLoading(true);
+  document.getElementById('optTableWrap').style.display = 'none';
+
+  try {
+    const res = await fetch(
+      `https://api.tradier.com/v1/markets/options/chains?symbol=${optCurrentTicker}&expiration=${expDate}&greeks=true`,
+      { headers: { Authorization: `Bearer ${TRADIER_KEY}`, Accept: 'application/json' } }
+    );
+    const json = await res.json();
+    const options = json?.options?.option;
+
+    if (!options) throw new Error('No chain data returned');
+
+    const chain = Array.isArray(options) ? options : [options];
+
+    // Split into calls and puts, sort by strike
+    const calls = chain.filter(o => o.option_type === 'call').sort((a,b) => a.strike - b.strike);
+    const puts  = chain.filter(o => o.option_type === 'put').sort((a,b) => a.strike - b.strike);
+
+    optChainData[expDate] = { calls, puts };
+    setOptLoading(false);
+    renderChain(optChainData[expDate]);
+
+  } catch(e) {
+    setOptLoading(false);
+    setOptError(e.message || 'Failed to load chain for this expiration.');
+  }
+}
+
+function renderChain(data) {
+  const rows = optCurrentSide === 'calls' ? data.calls : data.puts;
+  const tbody = document.getElementById('optTableBody');
+  tbody.innerHTML = '';
+
+  rows.forEach(opt => {
+    const strike = parseFloat(opt.strike);
+    const isITM  = optCurrentSide === 'calls' ? strike < optStockPrice : strike > optStockPrice;
+    const greeks = opt.greeks || {};
+
+    const delta = greeks.delta != null ? parseFloat(greeks.delta).toFixed(3) : '--';
+    const theta = greeks.theta != null ? parseFloat(greeks.theta).toFixed(3) : '--';
+    const iv    = opt.implied_volatility != null ? (parseFloat(opt.implied_volatility) * 100).toFixed(1) + '%' : '--';
+
+    const deltaClass = Math.abs(delta) >= 0.6 ? 'delta-high'
+                     : Math.abs(delta) >= 0.3 ? 'delta-mid' : 'delta-low';
+
+    const tr = document.createElement('tr');
+    if (isITM) tr.classList.add('itm-row');
+
+    tr.innerHTML = `
+      <td>
+        <div class="strike-cell">
+          $${strike.toFixed(0)}
+          ${isITM ? '<span class="itm-badge">ITM</span>' : ''}
+        </div>
+      </td>
+      <td>${fmt(opt.last)}</td>
+      <td>${fmt(opt.bid)}</td>
+      <td>${fmt(opt.ask)}</td>
+      <td>${fmtInt(opt.volume)}</td>
+      <td>${fmtInt(opt.open_interest)}</td>
+      <td class="iv-val">${iv}</td>
+      <td class="${deltaClass}">${delta}</td>
+      <td class="theta-val">${theta}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('optTableWrap').style.display = '';
+}
+
+function switchSide(side) {
+  optCurrentSide = side;
+  document.getElementById('toggleCalls').classList.toggle('active', side === 'calls');
+  document.getElementById('togglePuts').classList.toggle('active',  side === 'puts');
+
+  const expDate = document.getElementById('optExpSelect').value;
+  if (expDate && optChainData[expDate]) {
+    renderChain(optChainData[expDate]);
+  }
+}
+
+function setOptLoading(show) {
+  document.getElementById('optLoading').style.display = show ? '' : 'none';
+}
+
+function setOptError(msg) {
+  const el = document.getElementById('optError');
+  el.textContent = msg;
+  el.style.display = msg ? '' : 'none';
+}
+
+function formatExpDate(d) {
+  // d = "2025-01-17"
+  const [y, m, day] = d.split('-');
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${months[parseInt(m)-1]} ${parseInt(day)}, ${y}`;
+}
+
+function fmt(v) {
+  return v != null && v !== 0 ? `$${parseFloat(v).toFixed(2)}` : '--';
+}
+
+function fmtInt(v) {
+  if (v == null) return '--';
+  return parseInt(v).toLocaleString();
+}
+
+// Allow Enter key in options search
+document.getElementById('optTickerInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') loadOptionsChain();
+});
+
+</script>
 </body>
 </html>
