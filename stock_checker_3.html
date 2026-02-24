@@ -1616,11 +1616,11 @@ async function analyze() {
     btn.innerHTML = '<span class="spinner"></span>Searching...';
     btn.disabled = true;
     try {
-      const searchRes  = await fetch(`https://financialmodelingprep.com/stable/search-symbol?query=${encodeURIComponent(raw)}&limit=10&apikey=${FMP_KEY}`);
+      const searchRes  = await fetch(`https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(raw)}&limit=10&exchange=NASDAQ,NYSE,AMEX&apikey=${FMP_KEY}`);
       const searchData = await searchRes.json();
       const results    = Array.isArray(searchData) ? searchData : (searchData?.data || []);
       // Prefer US exchanges
-      const match = results.find(r => ['NASDAQ','NYSE','AMEX','NYSE ARCA'].includes(r.exchangeShortName))
+      const match = results.find(r => ['NASDAQ','NYSE','AMEX','NYSE ARCA'].includes(r.exchangeShortName || r.stockExchange))
                  || results[0];
       if (!match?.symbol) {
         showError(`No stock found for "${raw}". Try the ticker symbol (e.g. AAPL).`);
