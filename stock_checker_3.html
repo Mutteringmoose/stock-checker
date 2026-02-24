@@ -5,6 +5,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="color-scheme" content="dark"/>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+  <meta http-equiv="Pragma" content="no-cache"/>
+  <meta http-equiv="Expires" content="0"/>
   <meta name="theme-color" content="#060a0f"/>
 <title>Leap Scanner</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
@@ -140,12 +143,15 @@ letter-spacing: 0.5px;
 /* Search */
 .search-wrap {
 display: flex;
+flex-direction: column;
 gap: 12px;
-margin-bottom: 40px;
+margin-bottom: 24px;
+width: 100%;
 }
 
 .search-wrap input {
-flex: 1;
+width: 100%;
+box-sizing: border-box;
 background: var(–surface);
 border: 1px solid var(–border);
 border-radius: 8px;
@@ -178,6 +184,7 @@ border: none;
 border-radius: 12px;
 padding: 18px 28px;
 width: 100%;
+box-sizing: border-box;
 font-family: ‘Barlow’, sans-serif;
 font-size: 16px;
 font-weight: 700;
@@ -947,11 +954,10 @@ margin-right: 6px;
     </div>
   </div>
 
-  <div class="search-wrap">
+  <div class="search-wrap" style="display:flex!important;flex-direction:column!important;width:100%!important;gap:12px;">
     <input type="text" id="tickerInput" placeholder="MSFT, AAPL, NVDA..." maxlength="10"/>
     <button id="analyzeBtn" onclick="analyze()">Analyze</button>
   </div>
-  <p class="search-hint">Enter a ticker symbol to run a full health check</p>
 
   <div class="error-msg" id="errorMsg"></div>
 
