@@ -4,21 +4,27 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="color-scheme" content="dark"/>
+  <meta name="theme-color" content="#060a0f"/>
 <title>Leap Scanner</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Barlow:wght@300;400;600;700;900&display=swap" rel="stylesheet"/>
 <style>
-  :root {
-    --bg: #060a0f;
-    --surface: #0d1520;
-    --border: #1a2a3a;
-    --accent: #00d4ff;
-    --accent2: #00ff88;
-    --danger: #ff3d57;
-    --warn: #ffb800;
-    --text: #e0eaf5;
-    --muted: #4a6080;
-    --card: #0a1520;
+  html, body {
+    background-color: #060a0f !important;
   }
+
+:root {
+–bg: #060a0f;
+–surface: #0d1520;
+–border: #1a2a3a;
+–accent: #00d4ff;
+–accent2: #00ff88;
+–danger: #ff3d57;
+–warn: #ffb800;
+–text: #e0eaf5;
+–muted: #4a6080;
+–card: #0a1520;
+}
 
 - { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -1136,25 +1142,43 @@ async function fetchFMPFundamentals(ticker) {
     result = await fetchStatements('quarter');
 
     if (result.income.length >= 1) {
-      // Build TTM by summing last 4 quarters of income statement
-      const qtrs   = result.income.slice(0, 4);
+      // Build TTM by summing last 4 quarters
+      const qtrs = result.income.slice(0, 4);
+      const sumField = (arr, field) => arr.reduce((s, q) => s + (q[field] || 0), 0);
+
       const ttmInc = {
-        revenue:   qtrs.reduce((s, q) => s + (q.revenue   || 0), 0),
-        netIncome: qtrs.reduce((s, q) => s + (q.netIncome || 0), 0),
+        revenue:   sumField(qtrs, 'revenue'),
+        netIncome: sumField(qtrs, 'netIncome'),
         date:      qtrs[0]?.date
       };
-      // Prior TTM (quarters 4-7) for growth calc
+
+      // Prior 4 quarters for revenue growth
       const prevQtrs = result.income.slice(4, 8);
-      const prevInc  = prevQtrs.length >= 4 ? {
-        revenue: prevQtrs.reduce((s, q) => s + (q.revenue || 0), 0)
+      const prevInc  = prevQtrs.length >= 2 ? {
+        revenue: sumField(prevQtrs, 'revenue')
       } : null;
 
+      // Use most recent quarter BS
       return {
         income: [ttmInc, prevInc].filter(Boolean),
         bs:     result.bs,
-        source: 'TTM (Quarterly)'
+        source: 'TTM'
       };
     }
+
+    // Last resort - try fetching profile for basic margin data
+    try {
+      const profileRes  = await fetch(`https://financialmodelingprep.com/stable/profile?symbol=${ticker}&apikey=${FMP_KEY}`);
+      const profileData = await profileRes.json();
+      const p = Array.isArray(profileData) ? profileData[0] : profileData?.data?.[0];
+      if (p && p.netProfitMarginTTM != null) {
+        return {
+          income: [{ revenue: 1, netIncome: p.netProfitMarginTTM }],
+          bs:     [{ cashAndCashEquivalents: 0, totalDebt: 0 }],
+          source: 'Profile'
+        };
+      }
+    } catch(e2) {}
 
     return { income: [], bs: [], source: null };
   } catch(e) {
