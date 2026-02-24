@@ -1506,9 +1506,11 @@ async function fetchFMPFundamentals(ticker) {
 
   // ── Fallback: Alpha Vantage ───────────────────────
   try {
+    const avIncome = PROXY + encodeURIComponent(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${ticker}&apikey=${AV_KEY}`);
+    const avBS     = PROXY + encodeURIComponent(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker}&apikey=${AV_KEY}`);
     const [ovRes, bsRes] = await Promise.all([
-      fetch(`https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol=${ticker}&apikey=${AV_KEY}`),
-      fetch(`https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol=${ticker}&apikey=${AV_KEY}`)
+      fetch(avIncome),
+      fetch(avBS)
     ]);
     const ovData = await ovRes.json();
     const bsData = await bsRes.json();
