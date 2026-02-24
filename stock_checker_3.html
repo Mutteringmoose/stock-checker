@@ -1601,8 +1601,8 @@ async function analyze() {
   const upperRaw = raw.toUpperCase();
   let ticker;
 
-  // Pure ticker: 1-5 uppercase letters, no spaces → skip search
-  const isPureTicker = /^[A-Z]{1,5}$/.test(upperRaw) && raw.trim() === upperRaw;
+  // Pure ticker: 1-5 letters, no spaces → skip search
+  const isPureTicker = /^[A-Za-z]{1,5}$/.test(raw.trim()) && !raw.trim().includes(' ');
 
   if (isPureTicker) {
     ticker = upperRaw;
@@ -1613,13 +1613,18 @@ async function analyze() {
     btn2.innerHTML = '<span class="spinner"></span>Searching...';
     btn2.disabled = true;
     try {
-      const searchRes  = await fetch(`https://financialmodelingprep.com/api/v3/search?query=${encodeURIComponent(raw)}&limit=10&apikey=${FMP_KEY}`);
+      // Use Yahoo Finance autocomplete - free, no key, works for any company name
+      const yahooSearchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(raw.trim())}&quotesCount=5&newsCount=0&listsCount=0`;
+      const searchRes  = await fetch(PROXY + encodeURIComponent(yahooSearchUrl));
       const searchData = await searchRes.json();
-      const results    = Array.isArray(searchData) ? searchData : [];
-      const usExchanges = ['NASDAQ','NYSE','AMEX','NYSE ARCA','NYSEArca'];
-      const match = results.find(r => usExchanges.includes(r.exchangeShortName)) || results[0];
+      const quotes = searchData?.finance?.result?.[0]?.quotes || searchData?.quotes || [];
+      // Filter to US equity stocks only
+      const usExchanges = ['NMS','NYQ','NGM','NCM','ASE','NASDAQ','NYSE'];
+      const match = quotes.find(q => q.quoteType === 'EQUITY' && usExchanges.includes(q.exchange))
+                 || quotes.find(q => q.quoteType === 'EQUITY')
+                 || quotes[0];
       if (!match?.symbol) {
-        showError(`No stock found for "${raw}". Try the ticker symbol directly (e.g. RKT).`);
+        showError(`No stock found for "${raw}". Try the ticker symbol directly (e.g. UNH).`);
         btn2.innerHTML = origLabel;
         btn2.disabled  = false;
         return;
