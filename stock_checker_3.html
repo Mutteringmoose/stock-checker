@@ -57,6 +57,8 @@ z-index: 0;
 .container {
 width: 100%;
 max-width: 680px;
+padding: 0 16px;
+box-sizing: border-box;
 position: relative;
 z-index: 1;
 }
@@ -72,7 +74,7 @@ font-size: clamp(48px, 12vw, 80px);
 font-weight: 900;
 letter-spacing: -3px;
 color: #00cfff;
-text-shadow: 0 0 30px rgba(0,207,255,0.7), 0 0 60px rgba(0,207,255,0.35);
+text-shadow: none;
 margin-bottom: 12px;
 display: block;
 visibility: visible;
@@ -386,28 +388,33 @@ display: none;
 background: var(–card);
 border: 1px solid var(–border);
 border-radius: 12px;
-padding: 16px 24px;
+padding: 16px 20px;
 margin-bottom: 32px;
 display: flex;
 align-items: center;
-gap: 20px;
+gap: 14px;
 opacity: 0;
 transform: translateY(10px);
 transition: all 0.4s ease;
+width: 100%;
+box-sizing: border-box;
 }
 
 .fg-widget.loaded { opacity: 1; transform: translateY(0); }
 
 .fg-label {
 font-family: ‘Share Tech Mono’, monospace;
-font-size: 11px;
-letter-spacing: 3px;
+font-size: 10px;
+letter-spacing: 2px;
 color: var(–muted);
 text-transform: uppercase;
 flex-shrink: 0;
+writing-mode: vertical-rl;
+text-orientation: mixed;
+transform: rotate(180deg);
 }
 
-.fg-main { flex: 1; }
+.fg-main { flex: 1; min-width: 0; }
 
 .fg-bar-wrap {
 width: 100%;
